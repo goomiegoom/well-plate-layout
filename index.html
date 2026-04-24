@@ -44,9 +44,9 @@ header span{font-family:'DM Mono',monospace;font-size:11px;color:#888;}
 .combobox-input{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:6px 28px 6px 10px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);color:var(--text);}
 .combobox-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(42,95,143,.15);}
 .combobox-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text3);font-size:10px;}
-.combobox-dropdown{position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow-md);max-height:160px;overflow-y:auto;z-index:200;display:none;}
+.combobox-dropdown{position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow-md);max-height:200px;overflow-y:auto;overflow-x:hidden;z-index:500;display:none;}
 .combobox-dropdown.open{display:block;}
-.combobox-opt{padding:6px 10px;font-size:13px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border);}
+.combobox-opt{padding:7px 10px;font-size:12px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .combobox-opt:last-child{border-bottom:none;}
 .combobox-opt:hover,.combobox-opt.hl{background:var(--accent-light);color:var(--accent);}
 .combobox-opt em{font-style:normal;font-weight:600;color:var(--accent);}
@@ -85,9 +85,10 @@ input[type=text].inp:focus{outline:none;border-color:var(--accent);box-shadow:0 
 .clear-sel-btn{width:100%;padding:7px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;margin-top:2px;transition:all .15s;}
 .clear-sel-btn:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-light);}
 
-.legend-list{display:flex;flex-direction:column;gap:3px;max-height:140px;overflow-y:auto;}
-.legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text2);padding:2px 0;}
-.legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+.legend-list{display:flex;flex-direction:column;gap:0;overflow-y:auto;overflow-x:hidden;max-height:none;}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text2);padding:5px 0;border-bottom:1px solid var(--border);min-height:24px;flex-shrink:0;}
+.legend-item:last-child{border-bottom:none;}
+.legend-dot{width:13px;height:13px;border-radius:3px;flex-shrink:0;display:inline-block;}
 
 .action-btns{display:flex;flex-direction:column;gap:5px;}
 .print-btn{width:100%;padding:7px;border-radius:var(--radius);border:1.5px solid var(--border2);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;color:var(--text);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;}
@@ -225,9 +226,9 @@ label.mini{font-size:11px;color:var(--text3);margin-bottom:3px;display:block;}
       <button class="clear-sel-btn" onclick="clearSelected()">🗑 Clear All Layers on Selected Wells</button>
     </div>
 
-    <div class="sct" style="flex:1;min-height:60px;">
+    <div class="sct" style="flex:1;min-height:80px;display:flex;flex-direction:column;overflow:hidden;">
       <div class="sct-title">Legend</div>
-      <div class="legend-list" id="legendList">
+      <div class="legend-list" id="legendList" style="flex:1;overflow-y:auto;overflow-x:hidden;">
         <div style="font-size:11px;color:var(--text3);font-style:italic;">No assignments yet.</div>
       </div>
     </div>
@@ -549,7 +550,7 @@ function updateLegend(){
   list.innerHTML=entries.map(e=>{
     const cc=COND_COLORS[e.cond]||COND_COLORS['Custom'];
     const parts=[e.cell,e.cond,e.treat,e.conc].filter(Boolean);
-    return`<div class="legend-item"><div class="legend-dot" style="background:${e.color};border:1.5px solid ${cc.border};"></div><span>${parts.join(' · ')}</span></div>`;
+    return`<div class="legend-item"><div class="legend-dot" style="background:${e.color};border:1.5px solid ${cc.border};"></div><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;">${parts.join(' · ')}</span></div>`;
   }).join('');
 }
 function updateBottomBar(){

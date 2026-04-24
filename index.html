@@ -4,454 +4,126 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Well Plate Layout Designer</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f5f4f0;
-    --surface: #ffffff;
-    --surface2: #f0efe9;
-    --border: #e2e0d6;
-    --border2: #ccc9bb;
-    --text: #1a1915;
-    --text2: #6b6a62;
-    --text3: #9e9d94;
-    --accent: #2a5f8f;
-    --accent-light: #e8f1f8;
-    --accent2: #1e7a4a;
-    --accent2-light: #e6f4ec;
-    --danger: #c0392b;
-    --danger-light: #fdecea;
-    --amber: #b45309;
-    --amber-light: #fef3c7;
-    --purple: #6d28d9;
-    --purple-light: #ede9fe;
-    --radius: 8px;
-    --radius-lg: 12px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+:root {
+  --bg:#f5f4f0; --surface:#fff; --surface2:#f0efe9; --border:#e2e0d6; --border2:#ccc9bb;
+  --text:#1a1915; --text2:#6b6a62; --text3:#9e9d94;
+  --accent:#2a5f8f; --accent-light:#e8f1f8;
+  --accent2:#1e7a4a; --accent2-light:#e6f4ec;
+  --danger:#c0392b; --danger-light:#fdecea;
+  --amber:#b45309; --amber-light:#fef3c7;
+  --purple:#6d28d9; --purple-light:#ede9fe;
+  --teal:#2a9d8f; --teal-light:#e0f4f4;
+  --radius:8px; --shadow:0 1px 3px rgba(0,0,0,.08); --shadow-md:0 4px 12px rgba(0,0,0,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-  header {
-    background: var(--text);
-    color: #fff;
-    padding: 14px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #333;
-  }
-  header h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; color: #fff; }
-  header span { font-family: 'DM Mono', monospace; font-size: 11px; color: #888; }
+header{background:var(--text);color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #333;}
+header h1{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:#fff;}
+header span{font-family:'DM Mono',monospace;font-size:11px;color:#888;}
 
-  .layout { display: flex; height: calc(100vh - 52px); overflow: hidden; }
+.layout{display:flex;height:calc(100vh - 48px);overflow:hidden;}
+.sidebar{width:290px;min-width:290px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.plate-area{flex:1;display:flex;align-items:center;justify-content:center;padding:16px 20px;overflow:hidden;}
 
-  .sidebar {
-    width: 300px;
-    min-width: 300px;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
+.bottom-bar{background:var(--surface);border-top:1px solid var(--border);padding:8px 20px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--text2);flex-shrink:0;}
+.bb-tag{background:var(--accent-light);color:var(--accent);border-radius:4px;padding:1px 7px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
 
-  .main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
+.sct{border-bottom:1px solid var(--border);padding:11px 16px;}
+.sct-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px;}
 
-  .plate-area {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px 24px;
-    overflow: hidden;
-  }
+.format-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.fmt-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius);padding:7px 4px;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s;text-align:center;}
+.fmt-btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
+.fmt-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 
-  .bottom-bar {
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    padding: 10px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 13px;
-    color: var(--text2);
-  }
+.combobox-wrap{position:relative;width:100%;}
+.combobox-input{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:6px 28px 6px 10px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);color:var(--text);}
+.combobox-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(42,95,143,.15);}
+.combobox-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text3);font-size:10px;}
+.combobox-dropdown{position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow-md);max-height:160px;overflow-y:auto;z-index:200;display:none;}
+.combobox-dropdown.open{display:block;}
+.combobox-opt{padding:6px 10px;font-size:13px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border);}
+.combobox-opt:last-child{border-bottom:none;}
+.combobox-opt:hover,.combobox-opt.hl{background:var(--accent-light);color:var(--accent);}
+.combobox-opt em{font-style:normal;font-weight:600;color:var(--accent);}
+.combobox-empty{padding:7px 10px;font-size:12px;color:var(--text3);font-style:italic;}
 
-  /* Sidebar sections */
-  .sct {
-    border-bottom: 1px solid var(--border);
-    padding: 14px 18px;
-  }
-  .sct-title {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text3);
-    margin-bottom: 10px;
-  }
+.cond-row{display:flex;gap:5px;margin-bottom:5px;}
+.cond-btn{flex:1;padding:6px 0;border-radius:var(--radius);border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;background:var(--surface2);color:var(--text2);}
+.cond-btn:hover{border-color:var(--text2);color:var(--text);}
+.cond-btn.active-mock  {background:var(--accent2-light);border-color:var(--accent2);color:var(--accent2);}
+.cond-btn.active-inf   {background:var(--danger-light);border-color:var(--danger);color:var(--danger);}
+.cond-btn.active-blank {background:#f1f0eb;border-color:#bbb;color:#555;}
+.cond-btn.active-ctrl  {background:var(--amber-light);border-color:var(--amber);color:var(--amber);}
+.cond-btn.active-treat {background:var(--purple-light);border-color:var(--purple);color:var(--purple);}
+.cond-btn.active-custom{background:var(--teal-light);border-color:var(--teal);color:var(--teal);}
+#customCondWrap{margin-top:5px;display:none;}
+#customCondWrap.show{display:block;}
 
-  /* Format selector */
-  .format-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-  }
-  .fmt-btn {
-    background: var(--surface2);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius);
-    padding: 8px 4px;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: center;
-  }
-  .fmt-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
-  .fmt-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+/* 3-layer blocks */
+.layer-block{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:7px;overflow:hidden;}
+.layer-head{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.layer-badge{font-family:'DM Mono',monospace;font-size:9px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;}
+.layer-btns{display:flex;gap:4px;}
+.layer-clear-btn{font-size:10px;color:var(--text3);background:none;border:1px solid var(--border);border-radius:4px;padding:2px 6px;cursor:pointer;font-family:'DM Mono',monospace;white-space:nowrap;}
+.layer-clear-btn:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-light);}
+.layer-body{padding:8px 10px;display:flex;flex-direction:column;gap:5px;}
+.layer-apply-btn{font-size:11px;color:#fff;background:var(--accent);border:none;border-radius:5px;padding:6px 0;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;width:100%;transition:all .15s;}
+.layer-apply-btn:hover{background:#1d4e7a;}
+.layer-apply-btn:active{transform:scale(.98);}
 
-  /* Combobox */
-  .combobox-wrap { position: relative; width: 100%; }
-  .combobox-input {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 7px 30px 7px 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    background: var(--surface);
-    color: var(--text);
-    cursor: text;
-  }
-  .combobox-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(42,95,143,0.15); }
-  .combobox-arrow {
-    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-    pointer-events: none; color: var(--text3); font-size: 10px;
-  }
-  .combobox-dropdown {
-    position: absolute; top: calc(100% + 3px); left: 0; right: 0;
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
-    max-height: 180px; overflow-y: auto;
-    z-index: 200; display: none;
-  }
-  .combobox-dropdown.open { display: block; }
-  .combobox-opt {
-    padding: 7px 10px;
-    font-size: 13px;
-    cursor: pointer;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    border-bottom: 1px solid var(--border);
-  }
-  .combobox-opt:last-child { border-bottom: none; }
-  .combobox-opt:hover, .combobox-opt.highlighted { background: var(--accent-light); color: var(--accent); }
-  .combobox-opt em { font-style: normal; font-weight: 600; color: var(--accent); }
-  .combobox-empty { padding: 8px 10px; font-size: 12px; color: var(--text3); font-style: italic; }
+input[type=text].inp{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--surface);}
+input[type=text].inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(42,95,143,.15);}
 
-  /* Condition */
-  .cond-row { display: flex; gap: 6px; margin-bottom: 6px; }
-  .cond-btn {
-    flex: 1;
-    padding: 7px 0;
-    border-radius: var(--radius);
-    border: 1.5px solid var(--border);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-    background: var(--surface2);
-    color: var(--text2);
-  }
-  .cond-btn:hover { border-color: var(--text2); color: var(--text); }
-  .cond-btn.active-mock   { background: var(--accent2-light); border-color: var(--accent2); color: var(--accent2); }
-  .cond-btn.active-inf    { background: var(--danger-light);  border-color: var(--danger);  color: var(--danger); }
-  .cond-btn.active-blank  { background: #f1f0eb; border-color: #bbb; color: #555; }
-  .cond-btn.active-ctrl   { background: var(--amber-light);   border-color: var(--amber);   color: var(--amber); }
-  .cond-btn.active-treat  { background: var(--purple-light);  border-color: var(--purple);  color: var(--purple); }
-  .cond-btn.active-custom { background: #e0f4f4; border-color: #2a9d8f; color: #1a6b62; }
-  #customCondWrap { margin-top: 6px; display: none; }
-  #customCondWrap.show { display: block; }
-  #customCondInput {
-    width: 100%; border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text);
-  }
-  #customCondInput:focus { outline: none; border-color: #2a9d8f; box-shadow: 0 0 0 2px rgba(42,157,143,0.15); }
+.sel-row{display:flex;gap:5px;margin-bottom:5px;}
+.sel-btn{flex:1;padding:5px 0;border-radius:var(--radius);border:1px solid var(--border);font-size:10px;font-family:'DM Mono',monospace;cursor:pointer;background:var(--surface2);color:var(--text2);transition:all .15s;text-align:center;}
+.sel-btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
+.clear-sel-btn{width:100%;padding:7px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;margin-top:2px;transition:all .15s;}
+.clear-sel-btn:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-light);}
 
-  /* Concentration / treatment */
-  #concInput, #treatInput {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 7px 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  #concInput:focus, #treatInput:focus { outline: none; border-color: var(--accent); }
+.legend-list{display:flex;flex-direction:column;gap:3px;max-height:140px;overflow-y:auto;}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text2);padding:2px 0;}
+.legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
 
-  /* Selection controls */
-  .sel-row { display: flex; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
-  .sel-btn {
-    flex: 1;
-    min-width: 70px;
-    padding: 6px 0;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    font-size: 11px;
-    font-family: 'DM Mono', monospace;
-    cursor: pointer;
-    background: var(--surface2);
-    color: var(--text2);
-    transition: all 0.15s;
-    text-align: center;
-  }
-  .sel-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.action-btns{display:flex;flex-direction:column;gap:5px;}
+.print-btn{width:100%;padding:7px;border-radius:var(--radius);border:1.5px solid var(--border2);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;color:var(--text);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.print-btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
+.size-row{display:flex;gap:5px;margin-bottom:7px;}
+.size-opt{flex:1;padding:4px 0;border-radius:var(--radius);border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;background:var(--surface2);color:var(--text2);text-align:center;transition:all .15s;}
+.size-opt:hover{border-color:var(--accent);color:var(--accent);}
+.size-opt.active{background:var(--text);color:#fff;border-color:var(--text);}
 
-  .apply-btn {
-    width: 100%;
-    padding: 10px;
-    border-radius: var(--radius);
-    border: none;
-    background: var(--accent);
-    color: #fff;
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.02em;
-  }
-  .apply-btn:hover { background: #1d4e7a; }
-  .apply-btn:active { transform: scale(0.98); }
+/* Screen plate */
+.plate-wrapper{background:var(--surface);border-radius:14px;box-shadow:var(--shadow-md);padding:18px 22px;border:1px solid var(--border);display:inline-block;}
+.plate-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px;letter-spacing:.05em;text-transform:uppercase;}
+.plate-grid{display:grid;}
+.row-label{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--text3);display:flex;align-items:center;justify-content:center;width:18px;}
+.col-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);display:flex;align-items:center;justify-content:center;}
+.well{border-radius:50%;border:1.5px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s,box-shadow .1s;background:var(--surface2);position:relative;}
+.well:hover{transform:scale(1.1);box-shadow:0 0 0 2px var(--accent),0 2px 8px rgba(0,0,0,.12);z-index:5;}
+.well.selected{box-shadow:0 0 0 2.5px var(--accent);transform:scale(1.05);z-index:3;}
+.well.assigned{border-color:transparent;}
+.well-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;padding:1px;pointer-events:none;overflow:hidden;}
+.wl{font-family:'DM Mono',monospace;font-weight:500;text-align:center;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:96%;pointer-events:none;}
 
-  .clear-btn {
-    width: 100%;
-    padding: 8px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    color: var(--text2);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    cursor: pointer;
-    margin-top: 6px;
-    transition: all 0.15s;
-  }
-  .clear-btn:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-light); }
+.tooltip{position:fixed;background:var(--text);color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-family:'DM Mono',monospace;pointer-events:none;z-index:1000;white-space:nowrap;opacity:0;transition:opacity .1s;line-height:1.5;}
+.tooltip.show{opacity:1;}
+.notif{position:fixed;bottom:18px;right:18px;background:var(--text);color:#fff;padding:9px 14px;border-radius:var(--radius);font-size:13px;box-shadow:var(--shadow-md);z-index:999;opacity:0;transform:translateY(8px);transition:all .2s;}
+.notif.show{opacity:1;transform:translateY(0);}
+label.mini{font-size:11px;color:var(--text3);margin-bottom:3px;display:block;}
 
-  /* Legend */
-  .legend-list { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--text2);
-    padding: 3px 0;
-  }
-  .legend-dot {
-    width: 14px; height: 14px;
-    border-radius: 3px;
-    flex-shrink: 0;
-  }
-
-  /* Print / export buttons */
-  .action-btns { display: flex; flex-direction: column; gap: 6px; }
-  .print-btn {
-    width: 100%;
-    padding: 9px;
-    border-radius: var(--radius);
-    border: 1.5px solid var(--border2);
-    background: var(--surface);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    color: var(--text);
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-  .print-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
-
-  .size-row { display: flex; gap: 6px; margin-bottom: 8px; }
-  .size-opt {
-    flex: 1;
-    padding: 5px 0;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    cursor: pointer;
-    background: var(--surface2);
-    color: var(--text2);
-    text-align: center;
-    transition: all 0.15s;
-  }
-  .size-opt:hover { border-color: var(--accent); color: var(--accent); }
-  .size-opt.active { background: var(--text); color: #fff; border-color: var(--text); }
-
-  /* Well Plate */
-  .plate-wrapper {
-    background: var(--surface);
-    border-radius: 16px;
-    box-shadow: var(--shadow-md);
-    padding: 28px 32px;
-    border: 1px solid var(--border);
-    max-width: 100%;
-  }
-  .plate-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text3);
-    margin-bottom: 16px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  .plate-grid-wrap { overflow: hidden; }
-  .plate-grid {
-    display: grid;
-    gap: 3px;
-  }
-  .well-row { display: contents; }
-
-  .row-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-  }
-  .col-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--text3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 16px;
-  }
-
-  .well {
-    border-radius: 50%;
-    border: 1.5px solid var(--border2);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.1s, box-shadow 0.1s;
-    background: var(--surface2);
-    position: relative;
-    overflow: visible;
-  }
-  .well:hover { transform: scale(1.12); box-shadow: 0 0 0 2px var(--accent), 0 2px 8px rgba(0,0,0,0.12); z-index: 5; }
-  .well.selected { box-shadow: 0 0 0 2.5px var(--accent); transform: scale(1.06); z-index: 3; }
-  .well.assigned { border-color: transparent; }
-  .well-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    font-weight: 500;
-    text-align: center;
-    line-height: 1.1;
-    padding: 1px;
-    pointer-events: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 95%;
-    color: rgba(0,0,0,0.75);
-  }
-
-  /* Tooltip */
-  .tooltip {
-    position: fixed;
-    background: var(--text);
-    color: #fff;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-family: 'DM Mono', monospace;
-    pointer-events: none;
-    z-index: 1000;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.1s;
-  }
-  .tooltip.show { opacity: 1; }
-
-  /* Bottom bar info */
-  .bb-tag {
-    background: var(--accent-light);
-    color: var(--accent);
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    font-weight: 500;
-  }
-
-  /* Color palette for wells */
-  /* assigned colors by index in assignments array */
-
-  @media print {
-    body { background: white; }
-    header, .sidebar, .bottom-bar { display: none !important; }
-    .layout { height: auto; }
-    .main { overflow: visible; }
-    .plate-area { padding: 0; align-items: flex-start; justify-content: flex-start; overflow: visible; }
-    .plate-wrapper { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
-    .print-legend { display: block !important; margin-top: 12px; }
-    /* Size variants injected dynamically via JS */
-  }
-
-  .print-legend { display: none; }
-
-  .notif {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: var(--text);
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-    box-shadow: var(--shadow-md);
-    z-index: 999;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.2s;
-  }
-  .notif.show { opacity: 1; transform: translateY(0); }
-
-  label.mini { font-size: 11px; color: var(--text3); margin-bottom: 4px; display: block; }
-  .spacer { height: 6px; }
+/* Print: only #printPlate is visible */
+#printPlate{display:none;}
+@media print{
+  body *{visibility:hidden !important;}
+  #printPlate,#printPlate *{visibility:visible !important;}
+  #printPlate{display:block !important;position:fixed !important;top:0;left:0;margin:0;padding:0;}
+  @page{margin:8mm;}
+}
 </style>
 </head>
 <body>
@@ -464,7 +136,6 @@
 <div class="layout">
   <div class="sidebar">
 
-    <!-- Format -->
     <div class="sct">
       <div class="sct-title">Plate Format</div>
       <div class="format-grid">
@@ -477,7 +148,6 @@
       </div>
     </div>
 
-    <!-- Selection tools -->
     <div class="sct">
       <div class="sct-title">Selection</div>
       <div class="sel-row">
@@ -490,739 +160,583 @@
         <button class="sel-btn" onclick="selectByCol()">By Col</button>
         <button class="sel-btn" onclick="selectEmpty()">Empty</button>
       </div>
-      <div style="font-size: 11px; color: var(--text3); margin-top: 4px;">
-        Shift+click: row · Ctrl+click: column · Drag: box select
-      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px;">Shift+click: row · Ctrl+click: col · Drag: box</div>
     </div>
 
-    <!-- Cell line -->
     <div class="sct">
-      <div class="sct-title">Cell Line</div>
-      <div class="combobox-wrap" id="cellComboWrap">
-        <input type="text" id="cellInput" class="combobox-input" placeholder="Type to search or enter custom…" autocomplete="off"
-          oninput="filterCombo()" onfocus="openCombo()" onkeydown="comboKeydown(event)">
-        <span class="combobox-arrow">▼</span>
-        <div class="combobox-dropdown" id="comboDropdown"></div>
+      <div class="sct-title">Labels (3 Independent Layers)</div>
+
+      <!-- Layer 1 -->
+      <div class="layer-block">
+        <div class="layer-head">
+          <span class="layer-badge">⬤ Layer 1 — Cell Line</span>
+          <button class="layer-clear-btn" onclick="clearLayer(1)">Clear L1</button>
+        </div>
+        <div class="layer-body">
+          <div class="combobox-wrap" id="cellComboWrap">
+            <input type="text" id="cellInput" class="combobox-input" placeholder="Search or type cell line…" autocomplete="off"
+              oninput="filterCombo()" onfocus="openCombo()" onkeydown="comboKeydown(event)">
+            <span class="combobox-arrow">▼</span>
+            <div class="combobox-dropdown" id="comboDropdown"></div>
+          </div>
+          <button class="layer-apply-btn" onclick="applyLayer(1)">Apply Cell Line →</button>
+        </div>
       </div>
+
+      <!-- Layer 2 -->
+      <div class="layer-block">
+        <div class="layer-head">
+          <span class="layer-badge">⬤ Layer 2 — Condition</span>
+          <button class="layer-clear-btn" onclick="clearLayer(2)">Clear L2</button>
+        </div>
+        <div class="layer-body">
+          <div class="cond-row">
+            <button class="cond-btn" id="cMock"   onclick="setCondition('Mock')">Mock</button>
+            <button class="cond-btn active-inf" id="cInf" onclick="setCondition('Infected')">Infected</button>
+            <button class="cond-btn" id="cBlank"  onclick="setCondition('Blank')">Blank</button>
+          </div>
+          <div class="cond-row">
+            <button class="cond-btn" id="cCtrl"   onclick="setCondition('Control')">Control</button>
+            <button class="cond-btn" id="cTreat"  onclick="setCondition('Treated')">Treated</button>
+            <button class="cond-btn" id="cCustom" onclick="setCondition('Custom')">Custom…</button>
+          </div>
+          <div id="customCondWrap">
+            <input type="text" id="customCondInput" class="inp" placeholder="Enter condition name…">
+          </div>
+          <button class="layer-apply-btn" onclick="applyLayer(2)">Apply Condition →</button>
+        </div>
+      </div>
+
+      <!-- Layer 3 -->
+      <div class="layer-block">
+        <div class="layer-head">
+          <span class="layer-badge">⬤ Layer 3 — Details</span>
+          <button class="layer-clear-btn" onclick="clearLayer(3)">Clear L3</button>
+        </div>
+        <div class="layer-body">
+          <label class="mini">Virus / Treatment</label>
+          <input type="text" id="treatInput" class="inp" placeholder="e.g. IBV, SARS-CoV-2…">
+          <label class="mini" style="margin-top:2px;">Concentration / MOI</label>
+          <input type="text" id="concInput" class="inp" placeholder="e.g. MOI 0.1, 10 µM…">
+          <button class="layer-apply-btn" onclick="applyLayer(3)">Apply Details →</button>
+        </div>
+      </div>
+
+      <button class="clear-sel-btn" onclick="clearSelected()">🗑 Clear All Layers on Selected Wells</button>
     </div>
 
-    <!-- Condition -->
-    <div class="sct">
-      <div class="sct-title">Condition</div>
-      <div class="cond-row">
-        <button class="cond-btn" id="cMock"   onclick="setCondition('Mock')">Mock</button>
-        <button class="cond-btn active-inf" id="cInf" onclick="setCondition('Infected')">Infected</button>
-        <button class="cond-btn" id="cBlank"  onclick="setCondition('Blank')">Blank</button>
-      </div>
-      <div class="cond-row">
-        <button class="cond-btn" id="cCtrl"   onclick="setCondition('Control')">Control</button>
-        <button class="cond-btn" id="cTreat"  onclick="setCondition('Treated')">Treated</button>
-        <button class="cond-btn" id="cCustom" onclick="setCondition('Custom')">Custom…</button>
-      </div>
-      <div id="customCondWrap">
-        <input type="text" id="customCondInput" placeholder="Enter condition name…" oninput="updateCustomLabel()">
-      </div>
-      <div class="spacer"></div>
-      <label class="mini">Treatment / Virus (optional)</label>
-      <input type="text" id="treatInput" placeholder="e.g. IBV, SARS-CoV-2...">
-      <label class="mini">Concentration / MOI (optional)</label>
-      <input type="text" id="concInput" placeholder="e.g. MOI 0.1, 10 µM...">
-    </div>
-
-    <!-- Apply -->
-    <div class="sct">
-      <div class="sct-title">Assign</div>
-      <button class="apply-btn" onclick="applyToSelection()">Apply to Selected Wells</button>
-      <button class="clear-btn" onclick="clearSelected()">Clear Selected Wells</button>
-    </div>
-
-    <!-- Legend -->
-    <div class="sct" style="flex:1; min-height: 80px;">
+    <div class="sct" style="flex:1;min-height:60px;">
       <div class="sct-title">Legend</div>
       <div class="legend-list" id="legendList">
-        <div style="font-size:12px;color:var(--text3);font-style:italic;">No assignments yet.</div>
+        <div style="font-size:11px;color:var(--text3);font-style:italic;">No assignments yet.</div>
       </div>
     </div>
 
-    <!-- Print -->
     <div class="sct">
       <div class="sct-title">Print / Save</div>
       <label class="mini">Print size</label>
       <div class="size-row">
-        <button class="size-opt active" id="sCompact"  onclick="setPrintSize('compact')">Compact</button>
-        <button class="size-opt"        id="sHalf"     onclick="setPrintSize('half')">Half</button>
-        <button class="size-opt"        id="sFull"     onclick="setPrintSize('full')">Full</button>
+        <button class="size-opt active" id="sCompact" onclick="setPrintSize('compact')">Compact</button>
+        <button class="size-opt"        id="sHalf"    onclick="setPrintSize('half')">Half</button>
+        <button class="size-opt"        id="sFull"    onclick="setPrintSize('full')">Full</button>
       </div>
       <div class="action-btns">
         <button class="print-btn" onclick="printPlate()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
           Print Layout
         </button>
         <button class="print-btn" onclick="exportCSV()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           Export CSV
         </button>
         <button class="print-btn" onclick="exportJSON()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6"/></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6"/></svg>
           Save JSON
         </button>
         <button class="print-btn" onclick="loadJSON()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
           Load JSON
         </button>
       </div>
     </div>
 
-  </div>
+  </div><!-- /sidebar -->
 
   <div class="main">
     <div class="plate-area" id="plateArea">
       <div class="plate-wrapper" id="plateWrapper">
         <div class="plate-title" id="plateTitleEl">96-Well Plate</div>
-        <div class="plate-grid-wrap">
-          <div class="plate-grid" id="plateGrid"></div>
-        </div>
-        <div class="print-legend" id="printLegend"></div>
+        <div class="plate-grid" id="plateGrid"></div>
       </div>
     </div>
-
     <div class="bottom-bar">
       <span>Selected: <span class="bb-tag" id="bbSel">0</span></span>
       <span>Assigned: <span class="bb-tag" id="bbAsgn">0</span></span>
       <span>Empty: <span class="bb-tag" id="bbEmpty">0</span></span>
-      <span style="margin-left:auto; color: var(--text3);">Click wells to select · Right-click to clear single well</span>
+      <span style="margin-left:auto;color:var(--text3);font-size:11px;">Click · Shift+click (row) · Ctrl+click (col) · Drag · Right-click (clear well)</span>
     </div>
   </div>
 </div>
 
+<!-- Print target: only this is visible when printing -->
+<div id="printPlate"></div>
 <div class="tooltip" id="tooltip"></div>
 <div class="notif" id="notif"></div>
 
 <script>
-const FORMATS = {
-  6:   { rows: 2, cols: 3 },
-  12:  { rows: 3, cols: 4 },
-  24:  { rows: 4, cols: 6 },
-  48:  { rows: 6, cols: 8 },
-  96:  { rows: 8, cols: 12 },
-  384: { rows: 16, cols: 24 }
+const FORMATS={6:{rows:2,cols:3},12:{rows:3,cols:4},24:{rows:4,cols:6},48:{rows:6,cols:8},96:{rows:8,cols:12},384:{rows:16,cols:24}};
+const COND_COLORS={
+  Mock:    {border:'#66bb6a',text:'#1b5e20'},
+  Infected:{border:'#e57373',text:'#b71c1c'},
+  Blank:   {border:'#b0aea6',text:'#555'},
+  Control: {border:'#ffca28',text:'#6d4c00'},
+  Treated: {border:'#9575cd',text:'#311b92'},
+  Custom:  {border:'#2a9d8f',text:'#1a6b62'}
 };
-
-const COND_COLORS = {
-  'Mock':     { bg: '#e8f5e9', border: '#66bb6a', text: '#1b5e20' },
-  'Infected': { bg: '#fde8e8', border: '#e57373', text: '#b71c1c' },
-  'Blank':    { bg: '#f5f5f2', border: '#b0aea6', text: '#444' },
-  'Control':  { bg: '#fff8e1', border: '#ffca28', text: '#6d4c00' },
-  'Treated':  { bg: '#ede7f6', border: '#9575cd', text: '#311b92' },
-  'Custom':   { bg: '#e0f4f4', border: '#2a9d8f', text: '#1a6b62' }
-};
-
-const CELL_COLORS = [
-  '#b3d9ff','#b3f0d9','#ffe0b3','#f3b3f0','#b3ecff',
-  '#d4edda','#fff3cd','#f8d7da','#d1ecf1','#fce4ec',
-  '#e8f5e9','#e3f2fd','#f3e5f5','#fff9c4','#fbe9e7'
+const CELL_COLORS=[
+  '#b3d9ff','#b3f0d9','#ffe0b3','#f3b3f0','#b3ecff','#d4edda',
+  '#fff3cd','#f8d7da','#d1ecf1','#fce4ec','#e8f5e9','#e3f2fd',
+  '#f3e5f5','#fff9c4','#fbe9e7','#c8e6c9','#bbdefb','#f8bbd0',
+  '#dcedc8','#b2ebf2'
 ];
+const PRINT_SIZES={compact:{w:100,h:67},half:{w:130,h:87},full:{w:160,h:107}};
 
-let currentFormat = 96;
-let wells = {};
-let selected = new Set();
-let currentCondition = 'Infected';
-let assignments = [];
-let printSize = 'compact';
-let dragSelecting = false;
-let dragStart = null;
-let allCellOptions = [];
+let currentFormat=96;
+// wells[key]={layer1:{cell}, layer2:{condition}, layer3:{treatment,conc}, cellColor}
+let wells={};
+let selected=new Set();
+let currentCondition='Infected';
+let cellColorMap={};
+let cellColorIdx=0;
+let printSize='compact';
+let dragSelecting=false,dragStart=null;
+let allCellOptions=[],comboHighlight=-1;
 
-function getRowLabel(r) { return String.fromCharCode(65 + r); }
+const getRowLabel=r=>String.fromCharCode(65+r);
+function getCellColor(cell){
+  if(!cell)return'#f0efe9';
+  if(!cellColorMap[cell])cellColorMap[cell]=CELL_COLORS[cellColorIdx++%CELL_COLORS.length];
+  return cellColorMap[cell];
+}
 
-function initWells(fmt) {
-  const { rows, cols } = FORMATS[fmt];
-  wells = {};
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      wells[`${r}-${c}`] = null;
-    }
-  }
+function initWells(fmt){
+  const{rows,cols}=FORMATS[fmt]; wells={};
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)wells[`${r}-${c}`]={layer1:{},layer2:{},layer3:{},cellColor:null};
   selected.clear();
 }
 
-function setFormat(fmt) {
-  currentFormat = fmt;
-  document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.fmt-btn').forEach(b => {
-    if (b.textContent.trim() == fmt) b.classList.add('active');
-  });
-  const { rows, cols } = FORMATS[fmt];
-  document.getElementById('plateInfo').textContent = `${fmt}-well · ${rows}×${cols}`;
-  document.getElementById('plateTitleEl').textContent = `${fmt}-Well Plate`;
-  initWells(fmt);
-  renderPlate();
-  updateLegend();
+/* ——— SIZING ——— */
+function calcWellSize(){
+  const{rows,cols}=FORMATS[currentFormat];
+  const gap=currentFormat<=96?3:2;
+  const areaW=window.innerWidth-290-50-22;
+  const areaH=window.innerHeight-48-38-40;
+  const byW=Math.floor((areaW-gap*cols)/cols);
+  const byH=Math.floor((areaH-gap*rows)/rows);
+  const maxS={6:80,12:70,24:60,48:50,96:44,384:20};
+  const minS={6:40,12:30,24:22,48:18,96:15,384:9};
+  return Math.max(minS[currentFormat],Math.min(maxS[currentFormat],byW,byH));
+}
+
+function setFormat(fmt){
+  currentFormat=fmt;
+  document.querySelectorAll('.fmt-btn').forEach(b=>b.classList.toggle('active',b.textContent.trim()==fmt));
+  const{rows,cols}=FORMATS[fmt];
+  document.getElementById('plateInfo').textContent=`${fmt}-well · ${rows}×${cols}`;
+  document.getElementById('plateTitleEl').textContent=`${fmt}-Well Plate`;
+  initWells(fmt); renderPlate(); updateLegend(); updateBottomBar();
+}
+
+/* ——— RENDER ——— */
+function renderPlate(){
+  const grid=document.getElementById('plateGrid');
+  const{rows,cols}=FORMATS[currentFormat];
+  const ws=calcWellSize(),gap=currentFormat<=96?3:2;
+  grid.style.gridTemplateColumns=`18px repeat(${cols},${ws}px)`;
+  grid.style.gap=`${gap}px`;
+  grid.innerHTML='';
+
+  // col header
+  grid.appendChild(document.createElement('div'));
+  for(let c=0;c<cols;c++){
+    const l=document.createElement('div');l.className='col-label';
+    l.style.cssText=`height:${Math.max(10,ws*0.35)}px;font-size:${ws<20?7:9}px;`;
+    l.textContent=c+1; grid.appendChild(l);
+  }
+  // rows
+  for(let r=0;r<rows;r++){
+    const rl=document.createElement('div');rl.className='row-label';
+    rl.style.fontSize=`${ws<20?7:10}px`;rl.textContent=getRowLabel(r);
+    grid.appendChild(rl);
+    for(let c=0;c<cols;c++){
+      const key=`${r}-${c}`;
+      const el=document.createElement('div');el.className='well';
+      el.style.width=el.style.height=`${ws}px`;
+      el.dataset.key=key;el.dataset.r=r;el.dataset.c=c;
+      applyWellStyle(el,key,ws);
+      el.addEventListener('mousedown',e=>{
+        e.preventDefault();if(e.button===2)return;
+        dragSelecting=true;dragStart={r,c};handleWellClick(e,r,c,key);
+      });
+      el.addEventListener('mouseenter',e=>{
+        if(dragSelecting&&e.buttons===1)boxSelectTo(r,c);
+        showTooltip(e,key,r,c);
+      });
+      el.addEventListener('mouseleave',hideTooltip);
+      el.addEventListener('contextmenu',e=>{e.preventDefault();clearWellAll(key);});
+      grid.appendChild(el);
+    }
+  }
+  document.addEventListener('mouseup',()=>{dragSelecting=false;dragStart=null;});
+}
+
+function applyWellStyle(el,key,ws){
+  const d=wells[key];const isSel=selected.has(key);
+  let inner=el.querySelector('.well-inner');
+  if(!inner){inner=document.createElement('div');inner.className='well-inner';el.appendChild(inner);}
+  inner.innerHTML='';
+
+  const cell=d?.layer1?.cell||'';
+  const cond=d?.layer2?.condition||'';
+  const treat=d?.layer3?.treatment||'';
+  const conc=d?.layer3?.conc||'';
+  const hasAny=cell||cond||treat||conc;
+
+  if(hasAny){
+    el.classList.add('assigned');
+    const cc=COND_COLORS[cond]||COND_COLORS['Custom'];
+    el.style.background=d.cellColor||'#f0efe9';
+    el.style.borderColor=cc.border;el.style.borderWidth='2px';
+    const fsBig=ws<=16?5.5:ws<=22?6.5:ws<=30?7.5:9;
+    const fsSm =ws<=16?4.5:ws<=22?5.5:ws<=30?6.5:7.5;
+
+    if(cell&&ws>=16){
+      const s=document.createElement('div');s.className='wl';
+      s.style.cssText=`font-size:${fsBig}px;color:${cc.text};`;
+      s.textContent=ws<=20?cell[0]:cell.split(' ')[0].substring(0,ws<=28?5:8);
+      inner.appendChild(s);
+    }
+    if(cond&&ws>=14){
+      const s=document.createElement('div');s.className='wl';
+      s.style.cssText=`font-size:${fsSm}px;color:${cc.text};opacity:.8;`;
+      s.textContent=ws<=18?cond[0]:cond.substring(0,ws<=26?4:7);
+      inner.appendChild(s);
+    }
+    if((treat||conc)&&ws>=24){
+      const txt=[treat,conc].filter(Boolean).map(x=>x.substring(0,5)).join(' ');
+      const s=document.createElement('div');s.className='wl';
+      s.style.cssText=`font-size:${fsSm}px;color:${cc.text};opacity:.65;`;
+      s.textContent=txt;inner.appendChild(s);
+    }
+  } else {
+    el.classList.remove('assigned');
+    el.style.background='';el.style.borderColor='';el.style.borderWidth='';
+  }
+  if(isSel){
+    el.classList.add('selected');
+    el.style.outline='2.5px solid var(--accent)';el.style.outlineOffset='1px';
+  } else {
+    el.classList.remove('selected');el.style.outline='';el.style.outlineOffset='';
+  }
+}
+
+function refreshAll(){const ws=calcWellSize();document.querySelectorAll('.well').forEach(w=>applyWellStyle(w,w.dataset.key,ws));}
+function refreshKey(key){const el=document.querySelector(`.well[data-key="${key}"]`);if(el)applyWellStyle(el,key,calcWellSize());}
+
+/* ——— SELECTION ——— */
+function handleWellClick(e,r,c,key){
+  if(e.shiftKey){const{cols}=FORMATS[currentFormat];for(let cc=0;cc<cols;cc++)selected.add(`${r}-${cc}`);refreshAll();}
+  else if(e.ctrlKey||e.metaKey){const{rows}=FORMATS[currentFormat];for(let rr=0;rr<rows;rr++)selected.add(`${rr}-${c}`);refreshAll();}
+  else{if(selected.has(key))selected.delete(key);else selected.add(key);refreshKey(key);}
   updateBottomBar();
 }
-
-function renderPlate() {
-  const grid = document.getElementById('plateGrid');
-  const { rows, cols } = FORMATS[currentFormat];
-
-  const wellSize = calcWellSize();
-  const gap = currentFormat <= 96 ? 3 : 2;
-
-  grid.style.gridTemplateColumns = `20px repeat(${cols}, ${wellSize}px)`;
-  grid.style.gap = `${gap}px`;
-  grid.innerHTML = '';
-
-  // Header row
-  const corner = document.createElement('div');
-  grid.appendChild(corner);
-  for (let c = 0; c < cols; c++) {
-    const lbl = document.createElement('div');
-    lbl.className = 'col-label';
-    lbl.textContent = c + 1;
-    grid.appendChild(lbl);
-  }
-
-  // Data rows
-  for (let r = 0; r < rows; r++) {
-    const rlbl = document.createElement('div');
-    rlbl.className = 'row-label';
-    rlbl.textContent = getRowLabel(r);
-    grid.appendChild(rlbl);
-
-    for (let c = 0; c < cols; c++) {
-      const key = `${r}-${c}`;
-      const well = document.createElement('div');
-      well.className = 'well';
-      well.style.width = `${wellSize}px`;
-      well.style.height = `${wellSize}px`;
-      well.dataset.key = key;
-      well.dataset.r = r;
-      well.dataset.c = c;
-
-      applyWellStyle(well, key, wellSize);
-
-      well.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        if (e.button === 2) return;
-        dragSelecting = true;
-        dragStart = { r, c };
-        handleWellClick(e, r, c, key);
-      });
-      well.addEventListener('mouseenter', (e) => {
-        if (dragSelecting && e.buttons === 1) {
-          boxSelectTo(r, c);
-        }
-        showTooltip(e, key, r, c);
-      });
-      well.addEventListener('mouseleave', hideTooltip);
-      well.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        clearWell(key);
-      });
-
-      grid.appendChild(well);
-    }
-  }
-
-  document.addEventListener('mouseup', () => { dragSelecting = false; dragStart = null; });
-}
-
-function applyWellStyle(wellEl, key, wellSize) {
-  const data = wells[key];
-  const isSelected = selected.has(key);
-  const labelEl = wellEl.querySelector('.well-label') || document.createElement('div');
-  labelEl.className = 'well-label';
-
-  if (data) {
-    wellEl.classList.add('assigned');
-    const cond = data.condition || 'Infected';
-    const cc = COND_COLORS[cond] || COND_COLORS['Custom'];
-    const cellColor = data.cellColor || '#f0f0f0';
-    wellEl.style.background = cellColor;
-    wellEl.style.borderColor = cc.border;
-    wellEl.style.borderWidth = '2px';
-
-    const fontSize = wellSize <= 20 ? 7 : wellSize <= 34 ? 8 : 9;
-    labelEl.style.fontSize = `${fontSize}px`;
-    labelEl.style.color = cc.text;
-
-    let txt = '';
-    if (data.cell && wellSize > 22) txt += data.cell.split(' ')[0];
-    if (data.treatment && wellSize > 22) txt += (txt ? '\n' : '') + data.treatment.substring(0, 6);
-    if (data.conc && wellSize > 30) txt += (txt ? '\n' : '') + data.conc.substring(0, 8);
-    if (wellSize <= 22) txt = cond[0];
-    labelEl.textContent = txt || cond[0];
-    labelEl.style.whiteSpace = 'pre';
-  } else {
-    wellEl.classList.remove('assigned');
-    wellEl.style.background = '';
-    wellEl.style.borderColor = '';
-    wellEl.style.borderWidth = '';
-    labelEl.textContent = '';
-  }
-
-  if (isSelected) {
-    wellEl.classList.add('selected');
-    wellEl.style.outline = '2px solid #2a5f8f';
-    wellEl.style.outlineOffset = '1px';
-  } else {
-    wellEl.classList.remove('selected');
-    wellEl.style.outline = '';
-    wellEl.style.outlineOffset = '';
-  }
-
-  if (!wellEl.contains(labelEl)) wellEl.appendChild(labelEl);
-}
-
-function refreshWellEl(key) {
-  const el = document.querySelector(`.well[data-key="${key}"]`);
-  if (!el) return;
-  const { rows, cols } = FORMATS[currentFormat];
-  const wellSize = calcWellSize();
-  applyWellStyle(el, key, wellSize);
-}
-
-function handleWellClick(e, r, c, key) {
-  if (e.shiftKey) {
-    const { cols } = FORMATS[currentFormat];
-    for (let cc = 0; cc < cols; cc++) {
-      toggleSelect(`${r}-${cc}`, true);
-    }
-  } else if (e.ctrlKey || e.metaKey) {
-    const { rows } = FORMATS[currentFormat];
-    for (let rr = 0; rr < rows; rr++) {
-      toggleSelect(`${rr}-${c}`, true);
-    }
-  } else {
-    toggleSelect(key);
-  }
-  updateBottomBar();
-}
-
-function toggleSelect(key, add = false) {
-  if (add) {
-    selected.add(key);
-  } else {
-    if (selected.has(key)) selected.delete(key);
-    else selected.add(key);
-  }
-  refreshWellEl(key);
-}
-
-function boxSelectTo(r, c) {
-  if (!dragStart) return;
-  const { rows, cols } = FORMATS[currentFormat];
-  const r1 = Math.min(dragStart.r, r), r2 = Math.max(dragStart.r, r);
-  const c1 = Math.min(dragStart.c, c), c2 = Math.max(dragStart.c, c);
+function boxSelectTo(r,c){
+  if(!dragStart)return;
+  const r1=Math.min(dragStart.r,r),r2=Math.max(dragStart.r,r);
+  const c1=Math.min(dragStart.c,c),c2=Math.max(dragStart.c,c);
   selected.clear();
-  for (let rr = r1; rr <= r2; rr++)
-    for (let cc = c1; cc <= c2; cc++)
-      selected.add(`${rr}-${cc}`);
-  document.querySelectorAll('.well').forEach(w => {
-    applyWellStyle(w, w.dataset.key, parseInt(w.style.width));
-  });
-  updateBottomBar();
+  for(let rr=r1;rr<=r2;rr++)for(let cc=c1;cc<=c2;cc++)selected.add(`${rr}-${cc}`);
+  refreshAll();updateBottomBar();
+}
+function selectAll(){Object.keys(wells).forEach(k=>selected.add(k));refreshAll();updateBottomBar();}
+function clearSelection(){selected.clear();refreshAll();updateBottomBar();}
+function invertSelection(){Object.keys(wells).forEach(k=>{if(selected.has(k))selected.delete(k);else selected.add(k);});refreshAll();updateBottomBar();}
+function selectByRow(){
+  const v=prompt('Row(s) e.g. A or A,B,C:');if(!v)return;
+  const{cols}=FORMATS[currentFormat];
+  v.split(',').forEach(l=>{const r=l.trim().toUpperCase().charCodeAt(0)-65;if(r>=0&&r<FORMATS[currentFormat].rows)for(let c=0;c<cols;c++)selected.add(`${r}-${c}`);});
+  refreshAll();updateBottomBar();
+}
+function selectByCol(){
+  const v=prompt('Column(s) e.g. 1 or 1,2,3:');if(!v)return;
+  v.split(',').forEach(n=>{const c=parseInt(n.trim())-1;if(c>=0&&c<FORMATS[currentFormat].cols)for(let r=0;r<FORMATS[currentFormat].rows;r++)selected.add(`${r}-${c}`);});
+  refreshAll();updateBottomBar();
+}
+function selectEmpty(){
+  Object.keys(wells).forEach(k=>{const d=wells[k];if(!d?.layer1?.cell&&!d?.layer2?.condition&&!d?.layer3?.treatment&&!d?.layer3?.conc)selected.add(k);});
+  refreshAll();updateBottomBar();
 }
 
-function selectAll() {
-  Object.keys(wells).forEach(k => selected.add(k));
-  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
-  updateBottomBar();
-}
-
-function clearSelection() {
-  selected.clear();
-  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
-  updateBottomBar();
-}
-
-function invertSelection() {
-  Object.keys(wells).forEach(k => { if (selected.has(k)) selected.delete(k); else selected.add(k); });
-  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
-  updateBottomBar();
-}
-
-function selectByRow() {
-  const rowInput = prompt('Select row(s) e.g. A or A,B,C:');
-  if (!rowInput) return;
-  const { rows, cols } = FORMATS[currentFormat];
-  rowInput.split(',').forEach(l => {
-    l = l.trim().toUpperCase();
-    const r = l.charCodeAt(0) - 65;
-    if (r >= 0 && r < rows) {
-      for (let c = 0; c < cols; c++) selected.add(`${r}-${c}`);
+/* ——— 3-LAYER APPLY ——— */
+function applyLayer(layer){
+  if(!selected.size){notify('Select wells first!');return;}
+  selected.forEach(k=>{
+    const d=wells[k];
+    if(layer===1){
+      const cell=document.getElementById('cellInput').value.trim();
+      d.layer1={cell};
+      d.cellColor=getCellColor(cell||null);
+    } else if(layer===2){
+      let cond=currentCondition;
+      if(cond==='Custom')cond=document.getElementById('customCondInput').value.trim()||'Custom';
+      d.layer2={condition:cond};
+    } else {
+      d.layer3={treatment:document.getElementById('treatInput').value.trim(),conc:document.getElementById('concInput').value.trim()};
     }
   });
-  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
-  updateBottomBar();
+  refreshAll();updateLegend();updateBottomBar();
+  notify(`Layer ${layer} applied to ${selected.size} well${selected.size>1?'s':''}`);
 }
 
-function selectByCol() {
-  const colInput = prompt('Select column(s) e.g. 1 or 1,2,3:');
-  if (!colInput) return;
-  const { rows, cols } = FORMATS[currentFormat];
-  colInput.split(',').forEach(n => {
-    const c = parseInt(n.trim()) - 1;
-    if (c >= 0 && c < cols) {
-      for (let r = 0; r < rows; r++) selected.add(`${r}-${c}`);
-    }
+function clearLayer(layer){
+  if(!selected.size){notify('Select wells first!');return;}
+  selected.forEach(k=>{
+    const d=wells[k];
+    if(layer===1){d.layer1={};if(!d.layer2?.condition&&!d.layer3?.treatment)d.cellColor=null;}
+    else if(layer===2)d.layer2={};
+    else d.layer3={};
   });
-  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
-  updateBottomBar();
+  refreshAll();updateLegend();updateBottomBar();
+  notify(`Layer ${layer} cleared on ${selected.size} well${selected.size>1?'s':''}`);
 }
 
-function selectEmpty() {
-  Object.keys(wells).forEach(k => { if (!wells[k]) selected.add(k); });
-  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
-  updateBottomBar();
+function clearSelected(){
+  selected.forEach(k=>{wells[k]={layer1:{},layer2:{},layer3:{},cellColor:null};});
+  refreshAll();updateLegend();updateBottomBar();
+}
+function clearWellAll(key){
+  wells[key]={layer1:{},layer2:{},layer3:{},cellColor:null};
+  selected.delete(key);refreshKey(key);updateLegend();updateBottomBar();
 }
 
-function getAssignmentKey(data) {
-  return `${data.cell||''}|${data.condition}|${data.treatment||''}|${data.conc||''}`;
+/* ——— CONDITION ——— */
+function setCondition(c){
+  currentCondition=c;
+  const map={Mock:'Mock',Infected:'Inf',Blank:'Blank',Control:'Ctrl',Treated:'Treat',Custom:'Custom'};
+  const cls={Mock:'active-mock',Inf:'active-inf',Blank:'active-blank',Ctrl:'active-ctrl',Treat:'active-treat',Custom:'active-custom'};
+  ['Mock','Inf','Blank','Ctrl','Treat','Custom'].forEach(x=>{const b=document.getElementById('c'+x);if(b)b.className='cond-btn';});
+  const btn=document.getElementById('c'+map[c]);if(btn)btn.classList.add(cls[map[c]]);
+  const wrap=document.getElementById('customCondWrap');
+  if(c==='Custom'){wrap.classList.add('show');document.getElementById('customCondInput').focus();}
+  else wrap.classList.remove('show');
 }
 
-function getOrCreateAssignment(data) {
-  const k = getAssignmentKey(data);
-  let a = assignments.find(x => x.key === k);
-  if (!a) {
-    const ci = assignments.length % CELL_COLORS.length;
-    a = { key: k, ...data, color: CELL_COLORS[ci] };
-    assignments.push(a);
-  }
-  return a;
-}
-
-function applyToSelection() {
-  if (selected.size === 0) { notify('Select wells first!'); return; }
-  const cell = document.getElementById('cellInput').value.trim();
-  let condition = currentCondition;
-  if (condition === 'Custom') {
-    condition = document.getElementById('customCondInput').value.trim() || 'Custom';
-  }
-  const treatment = document.getElementById('treatInput').value.trim();
-  const conc = document.getElementById('concInput').value.trim();
-
-  const data = { cell, condition, treatment, conc };
-  const a = getOrCreateAssignment(data);
-
-  selected.forEach(k => {
-    wells[k] = { ...data, cellColor: a.color };
+/* ——— LEGEND ——— */
+function getLegendEntries(){
+  const map=new Map();
+  Object.values(wells).forEach(d=>{
+    const cell=d?.layer1?.cell||'',cond=d?.layer2?.condition||'',treat=d?.layer3?.treatment||'',conc=d?.layer3?.conc||'';
+    if(!cell&&!cond&&!treat&&!conc)return;
+    const k=`${cell}|${cond}|${treat}|${conc}`;
+    if(!map.has(k))map.set(k,{cell,cond,treat,conc,color:d.cellColor||'#eee'});
   });
-
-  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
-  updateLegend();
-  updateBottomBar();
-  notify(`Applied to ${selected.size} well${selected.size > 1 ? 's' : ''}`);
+  return[...map.values()];
 }
-
-function clearSelected() {
-  selected.forEach(k => { wells[k] = null; });
-  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
-  updateLegend();
-  updateBottomBar();
-}
-
-function clearWell(key) {
-  wells[key] = null;
-  selected.delete(key);
-  refreshWellEl(key);
-  updateLegend();
-  updateBottomBar();
-}
-
-function setCondition(c) {
-  currentCondition = c;
-  const ids = ['Mock','Inf','Blank','Ctrl','Treat','Custom'];
-  const cls = { Mock:'active-mock', Inf:'active-inf', Blank:'active-blank', Ctrl:'active-ctrl', Treat:'active-treat', Custom:'active-custom' };
-  ids.forEach(x => { const b = document.getElementById('c'+x); if(b) { b.className = 'cond-btn'; } });
-  const map = { Mock:'Mock', Infected:'Inf', Blank:'Blank', Control:'Ctrl', Treated:'Treat', Custom:'Custom' };
-  const btn = document.getElementById('c' + map[c]);
-  if (btn) btn.classList.add(cls[map[c]]);
-  const wrap = document.getElementById('customCondWrap');
-  if (c === 'Custom') {
-    wrap.classList.add('show');
-    document.getElementById('customCondInput').focus();
-  } else {
-    wrap.classList.remove('show');
-  }
-}
-
-function updateCustomLabel() {
-  // custom condition label is read live from input at apply time
-}
-
-function updateLegend() {
-  const legendList = document.getElementById('legendList');
-  const used = new Set(Object.values(wells).filter(Boolean).map(d => getAssignmentKey(d)));
-  const visible = assignments.filter(a => used.has(a.key));
-  if (visible.length === 0) {
-    legendList.innerHTML = '<div style="font-size:12px;color:var(--text3);font-style:italic;">No assignments yet.</div>';
-    document.getElementById('printLegend').innerHTML = '';
-    return;
-  }
-  legendList.innerHTML = visible.map(a => {
-    const cc = COND_COLORS[a.condition] || COND_COLORS['Custom'];
-    const parts = [a.cell, a.condition, a.treatment, a.conc].filter(Boolean);
-    return `<div class="legend-item">
-      <div class="legend-dot" style="background:${a.color};border:1.5px solid ${cc.border};"></div>
-      <span style="color:var(--text);font-size:11px;">${parts.join(' · ')}</span>
-    </div>`;
+function updateLegend(){
+  const list=document.getElementById('legendList');
+  const entries=getLegendEntries();
+  if(!entries.length){list.innerHTML='<div style="font-size:11px;color:var(--text3);font-style:italic;">No assignments yet.</div>';return;}
+  list.innerHTML=entries.map(e=>{
+    const cc=COND_COLORS[e.cond]||COND_COLORS['Custom'];
+    const parts=[e.cell,e.cond,e.treat,e.conc].filter(Boolean);
+    return`<div class="legend-item"><div class="legend-dot" style="background:${e.color};border:1.5px solid ${cc.border};"></div><span>${parts.join(' · ')}</span></div>`;
   }).join('');
-
-  document.getElementById('printLegend').innerHTML = `
-    <hr style="margin:16px 0;border:none;border-top:1px solid #ccc;">
-    <div style="font-size:11px;font-weight:600;margin-bottom:8px;font-family:monospace;">LEGEND</div>
-    ${visible.map(a => {
-      const cc = COND_COLORS[a.condition] || COND_COLORS['Custom'];
-      const parts = [a.cell, a.condition, a.treatment, a.conc].filter(Boolean);
-      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-        <div style="width:14px;height:14px;border-radius:3px;background:${a.color};border:1.5px solid ${cc.border};flex-shrink:0;"></div>
-        <span style="font-size:11px;font-family:monospace;">${parts.join(' · ')}</span>
-      </div>`;
-    }).join('')}
-  `;
+}
+function updateBottomBar(){
+  const total=Object.keys(wells).length;
+  const assigned=Object.values(wells).filter(d=>d?.layer1?.cell||d?.layer2?.condition||d?.layer3?.treatment||d?.layer3?.conc).length;
+  document.getElementById('bbSel').textContent=selected.size;
+  document.getElementById('bbAsgn').textContent=assigned;
+  document.getElementById('bbEmpty').textContent=total-assigned;
 }
 
-function updateBottomBar() {
-  const total = Object.keys(wells).length;
-  const assigned = Object.values(wells).filter(Boolean).length;
-  document.getElementById('bbSel').textContent = selected.size;
-  document.getElementById('bbAsgn').textContent = assigned;
-  document.getElementById('bbEmpty').textContent = total - assigned;
+/* ——— TOOLTIP ——— */
+const tooltipEl=document.getElementById('tooltip');
+function showTooltip(e,key,r,c){
+  const d=wells[key],wid=`${getRowLabel(r)}${c+1}`;
+  let h=`<b>${wid}</b>`;
+  if(d?.layer1?.cell)h+=`<br>Cell: ${d.layer1.cell}`;
+  if(d?.layer2?.condition)h+=`<br>Cond: ${d.layer2.condition}`;
+  if(d?.layer3?.treatment)h+=`<br>Virus: ${d.layer3.treatment}`;
+  if(d?.layer3?.conc)h+=`<br>Conc: ${d.layer3.conc}`;
+  if(!d?.layer1?.cell&&!d?.layer2?.condition&&!d?.layer3?.treatment)h+='<br><i>Empty</i>';
+  tooltipEl.innerHTML=h;tooltipEl.classList.add('show');
 }
+function hideTooltip(){tooltipEl.classList.remove('show');}
+document.addEventListener('mousemove',e=>{tooltipEl.style.left=(e.clientX+14)+'px';tooltipEl.style.top=(e.clientY-10)+'px';});
 
-// Tooltip
-const tooltipEl = document.getElementById('tooltip');
-function showTooltip(e, key, r, c) {
-  const data = wells[key];
-  const wellId = `${getRowLabel(r)}${c + 1}`;
-  let html = `<b>${wellId}</b>`;
-  if (data) {
-    if (data.cell) html += ` · ${data.cell}`;
-    if (data.condition) html += `<br>${data.condition}`;
-    if (data.treatment) html += ` · ${data.treatment}`;
-    if (data.conc) html += `<br>${data.conc}`;
+/* ——— COMBOBOX ——— */
+function openCombo(){filterCombo();document.getElementById('comboDropdown').classList.add('open');}
+function filterCombo(){
+  const q=document.getElementById('cellInput').value.trim().toLowerCase();
+  const dd=document.getElementById('comboDropdown');
+  const filtered=q?allCellOptions.filter(v=>v.toLowerCase().includes(q)):allCellOptions;
+  comboHighlight=-1;
+  if(!filtered.length){
+    dd.innerHTML=`<div class="combobox-empty">No match — will use as custom</div>`;
   } else {
-    html += '<br>Empty';
-  }
-  tooltipEl.innerHTML = html;
-  tooltipEl.classList.add('show');
-  moveTooltip(e);
-}
-function hideTooltip() { tooltipEl.classList.remove('show'); }
-document.addEventListener('mousemove', moveTooltip);
-function moveTooltip(e) {
-  tooltipEl.style.left = (e.clientX + 14) + 'px';
-  tooltipEl.style.top = (e.clientY - 10) + 'px';
-}
-
-// Combobox
-let comboHighlight = -1;
-
-function openCombo() {
-  filterCombo();
-  document.getElementById('comboDropdown').classList.add('open');
-}
-
-function filterCombo() {
-  const q = document.getElementById('cellInput').value.trim().toLowerCase();
-  const dd = document.getElementById('comboDropdown');
-  const filtered = q
-    ? allCellOptions.filter(v => v.toLowerCase().includes(q))
-    : allCellOptions;
-  comboHighlight = -1;
-  if (filtered.length === 0) {
-    dd.innerHTML = `<div class="combobox-empty">No match — will use "${document.getElementById('cellInput').value.trim() || '…'}" as custom</div>`;
-  } else {
-    dd.innerHTML = filtered.slice(0, 60).map((v, i) => {
-      const hi = q ? v.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<em>$1</em>') : v;
-      return `<div class="combobox-opt" data-val="${v}" onmousedown="pickCombo('${v.replace(/'/g,"\\'")}')">` + hi + `</div>`;
+    dd.innerHTML=filtered.slice(0,60).map(v=>{
+      const hi=q?v.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi'),'<em>$1</em>'):v;
+      return`<div class="combobox-opt" data-val="${v}" onmousedown="pickCombo('${v.replace(/'/g,"\\'")}')">${hi}</div>`;
     }).join('');
   }
   dd.classList.add('open');
 }
+function pickCombo(v){document.getElementById('cellInput').value=v;document.getElementById('comboDropdown').classList.remove('open');comboHighlight=-1;}
+function comboKeydown(e){
+  const dd=document.getElementById('comboDropdown');
+  const opts=dd.querySelectorAll('.combobox-opt');
+  if(e.key==='ArrowDown'){e.preventDefault();comboHighlight=Math.min(comboHighlight+1,opts.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();comboHighlight=Math.max(comboHighlight-1,0);}
+  else if(e.key==='Enter'){if(comboHighlight>=0&&opts[comboHighlight])pickCombo(opts[comboHighlight].dataset.val);dd.classList.remove('open');return;}
+  else if(e.key==='Escape'){dd.classList.remove('open');return;}
+  opts.forEach((o,i)=>o.classList.toggle('hl',i===comboHighlight));
+  if(opts[comboHighlight])opts[comboHighlight].scrollIntoView({block:'nearest'});
+}
+document.addEventListener('click',e=>{if(!document.getElementById('cellComboWrap').contains(e.target))document.getElementById('comboDropdown').classList.remove('open');});
 
-function pickCombo(val) {
-  document.getElementById('cellInput').value = val;
-  document.getElementById('comboDropdown').classList.remove('open');
-  comboHighlight = -1;
+/* ——— PRINT ——— */
+function setPrintSize(s){
+  printSize=s;
+  ['Compact','Half','Full'].forEach(x=>document.getElementById('s'+x)?.classList.toggle('active',x.toLowerCase()===s));
 }
 
-function comboKeydown(e) {
-  const dd = document.getElementById('comboDropdown');
-  const opts = dd.querySelectorAll('.combobox-opt');
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    comboHighlight = Math.min(comboHighlight + 1, opts.length - 1);
-    opts.forEach((o,i) => o.classList.toggle('highlighted', i === comboHighlight));
-    if (opts[comboHighlight]) opts[comboHighlight].scrollIntoView({block:'nearest'});
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    comboHighlight = Math.max(comboHighlight - 1, 0);
-    opts.forEach((o,i) => o.classList.toggle('highlighted', i === comboHighlight));
-    if (opts[comboHighlight]) opts[comboHighlight].scrollIntoView({block:'nearest'});
-  } else if (e.key === 'Enter') {
-    if (comboHighlight >= 0 && opts[comboHighlight]) {
-      pickCombo(opts[comboHighlight].dataset.val);
-    } else {
-      dd.classList.remove('open');
-    }
-  } else if (e.key === 'Escape') {
-    dd.classList.remove('open');
-  }
-}
+function printPlate(){
+  const{w,h}=PRINT_SIZES[printSize];
+  const{rows,cols}=FORMATS[currentFormat];
 
-document.addEventListener('click', e => {
-  if (!document.getElementById('cellComboWrap').contains(e.target)) {
-    document.getElementById('comboDropdown').classList.remove('open');
-  }
-});
+  // Compute well size in mm to perfectly fill the box
+  const padmm=4, labelWmm=5, labelHmm=4, titlemm=7;
+  const gapFrac=0.15;
+  const useW=w-padmm*2-labelWmm;
+  const useH=h-padmm*2-titlemm-labelHmm;
+  const wsByW=useW/(cols*(1+gapFrac));
+  const wsByH=useH/(rows*(1+gapFrac));
+  const wsmm=Math.min(wsByW,wsByH);
+  const gapmm=wsmm*gapFrac;
 
-// Print size
-const PRINT_SIZES = {
-  compact: { wMin: 90,  wMax: 110, hMin: 60,  hMax: 73 },
-  half:    { wMin: 120, wMax: 140, hMin: 80,  hMax: 93 },
-  full:    { wMin: 150, wMax: 170, hMin: 100, hMax: 113 }
-};
+  const entries=getLegendEntries();
 
-function setPrintSize(size) {
-  printSize = size;
-  ['Compact','Half','Full'].forEach(s => {
-    document.getElementById('s'+s)?.classList.toggle('active', s.toLowerCase() === size);
-  });
-}
+  // Build grid html (pure mm sizing)
+  let gridRows='';
+  // col labels
+  gridRows+=`<div style="display:flex;margin-left:${labelWmm}mm;margin-bottom:${gapmm}mm;gap:${gapmm}mm;">`;
+  for(let c=0;c<cols;c++)
+    gridRows+=`<div style="width:${wsmm}mm;font-size:${Math.max(2,wsmm*0.38)}mm;font-family:monospace;color:#aaa;text-align:center;">${c+1}</div>`;
+  gridRows+='</div>';
 
-function printPlate() {
-  const sz = PRINT_SIZES[printSize];
-  const wMid = (sz.wMin + sz.wMax) / 2;
-  const hMid = (sz.hMin + sz.hMax) / 2;
-  const styleEl = document.createElement('style');
-  styleEl.id = 'print-size-override';
-  styleEl.textContent = `
-    @page { size: A4 landscape; margin: 8mm; }
-    @media print {
-      #plateWrapper {
-        width: ${wMid}mm !important;
-        max-width: ${wMid}mm !important;
-        min-height: ${hMid}mm !important;
-        padding: 6px 8px !important;
-        overflow: hidden !important;
+  for(let r=0;r<rows;r++){
+    gridRows+=`<div style="display:flex;align-items:center;gap:${gapmm}mm;margin-bottom:${gapmm}mm;">`;
+    gridRows+=`<div style="width:${labelWmm}mm;font-size:${Math.max(2,wsmm*0.38)}mm;font-family:monospace;color:#aaa;text-align:right;padding-right:.8mm;">${getRowLabel(r)}</div>`;
+    for(let c=0;c<cols;c++){
+      const key=`${r}-${c}`,d=wells[key];
+      const cell=d?.layer1?.cell||'',cond=d?.layer2?.condition||'',treat=d?.layer3?.treatment||'',conc=d?.layer3?.conc||'';
+      const has=cell||cond||treat||conc;
+      const cc=COND_COLORS[cond]||{border:'#ccc',text:'#444'};
+      const bg=has?(d.cellColor||'#f0efe9'):'#f8f8f5';
+      const bdr=has?cc.border:'#d0cfc8';
+      const fsBig=Math.max(1.8,wsmm*0.28)+'mm';
+      const fsSm =Math.max(1.5,wsmm*0.22)+'mm';
+      let inner='';
+      if(has){
+        if(cell)inner+=`<div style="font-size:${fsBig};color:${cc.text};font-family:monospace;line-height:1.2;overflow:hidden;white-space:nowrap;max-width:${wsmm*.88}mm;">${cell.split(' ')[0].substring(0,7)}</div>`;
+        if(cond)inner+=`<div style="font-size:${fsSm};color:${cc.text};font-family:monospace;line-height:1.2;opacity:.85;">${cond.substring(0,6)}</div>`;
+        const det=[treat,conc].filter(Boolean).map(x=>x.substring(0,5)).join(' ');
+        if(det)inner+=`<div style="font-size:${fsSm};color:${cc.text};font-family:monospace;line-height:1.2;opacity:.7;">${det}</div>`;
       }
-      .plate-grid-wrap { overflow: hidden !important; }
-      .well { transform: none !important; }
-      .plate-area { padding: 0 !important; overflow: hidden !important; }
+      gridRows+=`<div style="width:${wsmm}mm;height:${wsmm}mm;border-radius:50%;border:${has?'0.6':'0.4'}pt solid ${bdr};background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">${inner}</div>`;
     }
-  `;
-  document.head.appendChild(styleEl);
-  window.print();
-  setTimeout(() => { const s = document.getElementById('print-size-override'); if(s) s.remove(); }, 1200);
-}
-
-// Export CSV
-function exportCSV() {
-  const { rows, cols } = FORMATS[currentFormat];
-  let csv = 'Well,Row,Column,Cell Line,Condition,Treatment,Concentration\n';
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const key = `${r}-${c}`;
-      const d = wells[key];
-      const wellId = `${getRowLabel(r)}${c + 1}`;
-      csv += `${wellId},${getRowLabel(r)},${c + 1},${d?.cell||''},${d?.condition||''},${d?.treatment||''},${d?.conc||''}\n`;
-    }
+    gridRows+='</div>';
   }
-  download('well_plate_layout.csv', csv, 'text/csv');
-  notify('CSV exported!');
+
+  // Legend
+  let legendHtml='';
+  if(entries.length){
+    const items=entries.map(e=>{
+      const cc=COND_COLORS[e.cond]||COND_COLORS['Custom'];
+      const parts=[e.cell,e.cond,e.treat,e.conc].filter(Boolean);
+      return`<div style="display:flex;align-items:center;gap:1mm;margin-right:3mm;margin-bottom:1mm;">
+        <div style="width:2.5mm;height:2.5mm;border-radius:.8mm;background:${e.color};border:.4pt solid ${cc.border};flex-shrink:0;"></div>
+        <span style="font-family:monospace;font-size:2mm;">${parts.join(' · ')}</span></div>`;
+    }).join('');
+    legendHtml=`<div style="margin-top:2.5mm;border-top:.4pt solid #ddd;padding-top:1.5mm;display:flex;flex-wrap:wrap;">${items}</div>`;
+  }
+
+  const html=`<div style="
+    display:inline-block;padding:${padmm}mm;
+    background:white;border:0.7pt solid #ccc;border-radius:2mm;
+    font-family:'DM Sans',Arial,sans-serif;">
+    <div style="font-family:monospace;font-size:3mm;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:${titlemm/2}mm;">${currentFormat}-Well Plate</div>
+    ${gridRows}${legendHtml}
+  </div>`;
+
+  const target=document.getElementById('printPlate');
+  target.innerHTML=html;
+  window.print();
+  setTimeout(()=>{target.innerHTML='';},1500);
 }
 
-// JSON
-function exportJSON() {
-  const data = { format: currentFormat, wells, assignments };
-  download('well_plate_layout.json', JSON.stringify(data, null, 2), 'application/json');
-  notify('JSON saved!');
+/* ——— EXPORT ——— */
+function exportCSV(){
+  const{rows,cols}=FORMATS[currentFormat];
+  let csv='Well,Row,Column,Cell Line,Condition,Treatment,Concentration\n';
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const key=`${r}-${c}`,d=wells[key];
+    csv+=`${getRowLabel(r)}${c+1},${getRowLabel(r)},${c+1},${d?.layer1?.cell||''},${d?.layer2?.condition||''},${d?.layer3?.treatment||''},${d?.layer3?.conc||''}\n`;
+  }
+  dl('well_plate_layout.csv',csv,'text/csv');notify('CSV exported!');
 }
-
-function loadJSON() {
-  const inp = document.createElement('input');
-  inp.type = 'file'; inp.accept = '.json';
-  inp.onchange = e => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        currentFormat = data.format || 96;
-        wells = data.wells || {};
-        assignments = data.assignments || [];
-        document.querySelectorAll('.fmt-btn').forEach(b => {
-          b.classList.toggle('active', b.textContent.trim() == currentFormat);
-        });
-        renderPlate();
-        updateLegend();
-        updateBottomBar();
-        notify('Layout loaded!');
-      } catch { notify('Invalid JSON file'); }
+function exportJSON(){
+  dl('well_plate_layout.json',JSON.stringify({format:currentFormat,wells,cellColorMap},null,2),'application/json');notify('JSON saved!');
+}
+function loadJSON(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=e=>{
+    const fr=new FileReader();
+    fr.onload=ev=>{
+      try{
+        const data=JSON.parse(ev.target.result);
+        currentFormat=data.format||96;wells=data.wells||{};cellColorMap=data.cellColorMap||{};
+        document.querySelectorAll('.fmt-btn').forEach(b=>b.classList.toggle('active',b.textContent.trim()==currentFormat));
+        renderPlate();updateLegend();updateBottomBar();notify('Layout loaded!');
+      }catch{notify('Invalid JSON');}
     };
-    reader.readAsText(file);
+    fr.readAsText(e.target.files[0]);
   };
   inp.click();
 }
-
-function download(name, content, type) {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([content], { type }));
-  a.download = name;
-  a.click();
+function dl(name,content,type){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type}));
+  a.download=name;a.click();
+}
+function notify(msg){
+  const el=document.getElementById('notif');el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2200);
 }
 
-// Notify
-function notify(msg) {
-  const el = document.getElementById('notif');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2200);
+/* ——— LOAD CELLS ——— */
+async function loadCellLines(){
+  const url='https://docs.google.com/spreadsheets/d/e/2PACX-1vS7oI87aVZGiXPZdsQdqdfvPlBru3oZZZPw2AbqzEAbQPKr7m5iWEoL6BBH3M2hThSZpZ232R5TbjTt/pub?output=csv';
+  try{
+    const res=await fetch(url);if(!res.ok)throw 0;
+    const all=new Set();
+    (await res.text()).split('\n').forEach(line=>line.split(',').forEach(c=>{const v=c.replace(/^"|"$/g,'').trim();if(v)all.add(v);}));
+    allCellOptions=[...all].sort();
+  }catch{allCellOptions=[];}
 }
 
-// Load cells from Google Sheets CSV
-async function loadCellLines() {
-  const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7oI87aVZGiXPZdsQdqdfvPlBru3oZZZPw2AbqzEAbQPKr7m5iWEoL6BBH3M2hThSZpZ232R5TbjTt/pub?output=csv';
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('fetch failed');
-    const text = await res.text();
-    const lines = text.split('\n').filter(l => l.trim());
-    const allCells = new Set();
-    lines.forEach(line => {
-      line.split(',').forEach(c => {
-        const v = c.replace(/^"|"$/g,'').trim();
-        if (v) allCells.add(v);
-      });
-    });
-    allCellOptions = [...allCells].sort();
-  } catch(err) {
-    allCellOptions = [];
-    console.warn('Could not load cell lines from sheet:', err);
-  }
-}
-
-// Dynamic well sizing
-function calcWellSize() {
-  const { rows, cols } = FORMATS[currentFormat];
-  const sidebarW = 300;
-  const padding = 80;  // plate-area padding + plate-wrapper padding
-  const labelCol = 24; // row label column width
-  const gap = currentFormat <= 96 ? 3 : 2;
-  const availW = window.innerWidth - sidebarW - padding - labelCol;
-  const availH = window.innerHeight - 52 - 60 - padding - 30; // header + bottombar + padding + title
-  const byWidth  = Math.floor((availW - gap * cols) / cols);
-  const byHeight = Math.floor((availH - gap * rows) / rows);
-  const max = currentFormat <= 6 ? 80 : currentFormat <= 24 ? 64 : currentFormat <= 48 ? 52 : currentFormat <= 96 ? 46 : 22;
-  const min = currentFormat <= 96 ? 18 : 12;
-  return Math.max(min, Math.min(max, byWidth, byHeight));
-}
-
-window.addEventListener('resize', () => renderPlate());
-
-// Init
+window.addEventListener('resize',()=>renderPlate());
 setFormat(96);
 loadCellLines();
 setCondition('Infected');

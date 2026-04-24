@@ -71,8 +71,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
-    overflow: auto;
+    padding: 20px 24px;
+    overflow: hidden;
   }
 
   .bottom-bar {
@@ -330,7 +330,7 @@
     text-transform: uppercase;
   }
 
-  .plate-grid-wrap { overflow-x: auto; }
+  .plate-grid-wrap { overflow: hidden; }
   .plate-grid {
     display: grid;
     gap: 3px;
@@ -665,9 +665,7 @@ function renderPlate() {
   const grid = document.getElementById('plateGrid');
   const { rows, cols } = FORMATS[currentFormat];
 
-  const wellSize = currentFormat <= 24 ? 56 :
-                   currentFormat <= 48 ? 44 :
-                   currentFormat <= 96 ? 34 : 18;
+  const wellSize = calcWellSize();
   const gap = currentFormat <= 96 ? 3 : 2;
 
   grid.style.gridTemplateColumns = `20px repeat(${cols}, ${wellSize}px)`;
@@ -780,7 +778,7 @@ function refreshWellEl(key) {
   const el = document.querySelector(`.well[data-key="${key}"]`);
   if (!el) return;
   const { rows, cols } = FORMATS[currentFormat];
-  const wellSize = currentFormat <= 24 ? 56 : currentFormat <= 48 ? 44 : currentFormat <= 96 ? 34 : 18;
+  const wellSize = calcWellSize();
   applyWellStyle(el, key, wellSize);
 }
 
@@ -1205,6 +1203,24 @@ async function loadCellLines() {
     console.warn('Could not load cell lines from sheet:', err);
   }
 }
+
+// Dynamic well sizing
+function calcWellSize() {
+  const { rows, cols } = FORMATS[currentFormat];
+  const sidebarW = 300;
+  const padding = 80;  // plate-area padding + plate-wrapper padding
+  const labelCol = 24; // row label column width
+  const gap = currentFormat <= 96 ? 3 : 2;
+  const availW = window.innerWidth - sidebarW - padding - labelCol;
+  const availH = window.innerHeight - 52 - 60 - padding - 30; // header + bottombar + padding + title
+  const byWidth  = Math.floor((availW - gap * cols) / cols);
+  const byHeight = Math.floor((availH - gap * rows) / rows);
+  const max = currentFormat <= 6 ? 80 : currentFormat <= 24 ? 64 : currentFormat <= 48 ? 52 : currentFormat <= 96 ? 46 : 22;
+  const min = currentFormat <= 96 ? 18 : 12;
+  return Math.max(min, Math.min(max, byWidth, byHeight));
+}
+
+window.addEventListener('resize', () => renderPlate());
 
 // Init
 setFormat(96);

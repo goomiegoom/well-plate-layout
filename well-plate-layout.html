@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Well Plate Layout Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: #e2e0d6;
+    --border2: #ccc9bb;
+    --text: #1a1915;
+    --text2: #6b6a62;
+    --text3: #9e9d94;
+    --accent: #2a5f8f;
+    --accent-light: #e8f1f8;
+    --accent2: #1e7a4a;
+    --accent2-light: #e6f4ec;
+    --danger: #c0392b;
+    --danger-light: #fdecea;
+    --amber: #b45309;
+    --amber-light: #fef3c7;
+    --purple: #6d28d9;
+    --purple-light: #ede9fe;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header {
+    background: var(--text);
+    color: #fff;
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #333;
+  }
+  header h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; color: #fff; }
+  header span { font-family: 'DM Mono', monospace; font-size: 11px; color: #888; }
+
+  .layout { display: flex; height: calc(100vh - 52px); overflow: hidden; }
+
+  .sidebar {
+    width: 300px;
+    min-width: 300px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .plate-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow: auto;
+  }
+
+  .bottom-bar {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  /* Sidebar sections */
+  .sct {
+    border-bottom: 1px solid var(--border);
+    padding: 14px 18px;
+  }
+  .sct-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    margin-bottom: 10px;
+  }
+
+  /* Format selector */
+  .format-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .fmt-btn {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .fmt-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .fmt-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* Cell selector */
+  #cellSelect {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    background: var(--surface);
+    color: var(--text);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+  }
+  #cellInput {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    margin-top: 6px;
+  }
+  #cellInput:focus, #cellSelect:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(42,95,143,0.15); }
+
+  /* Condition */
+  .cond-row { display: flex; gap: 6px; margin-bottom: 6px; }
+  .cond-btn {
+    flex: 1;
+    padding: 7px 0;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface2);
+    color: var(--text2);
+  }
+  .cond-btn:hover { border-color: var(--text2); color: var(--text); }
+  .cond-btn.active-inf { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
+  .cond-btn.active-mock { background: var(--accent2-light); border-color: var(--accent2); color: var(--accent2); }
+  .cond-btn.active-ctrl { background: var(--amber-light); border-color: var(--amber); color: var(--amber); }
+  .cond-btn.active-treat { background: var(--purple-light); border-color: var(--purple); color: var(--purple); }
+
+  /* Concentration / treatment */
+  #concInput, #treatInput {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  #concInput:focus, #treatInput:focus { outline: none; border-color: var(--accent); }
+
+  /* Selection controls */
+  .sel-row { display: flex; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+  .sel-btn {
+    flex: 1;
+    min-width: 70px;
+    padding: 6px 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    background: var(--surface2);
+    color: var(--text2);
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .sel-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
+  .apply-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: var(--radius);
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .apply-btn:hover { background: #1d4e7a; }
+  .apply-btn:active { transform: scale(0.98); }
+
+  .clear-btn {
+    width: 100%;
+    padding: 8px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: all 0.15s;
+  }
+  .clear-btn:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-light); }
+
+  /* Legend */
+  .legend-list { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text2);
+    padding: 3px 0;
+  }
+  .legend-dot {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* Print / export buttons */
+  .action-btns { display: flex; flex-direction: column; gap: 6px; }
+  .print-btn {
+    width: 100%;
+    padding: 9px;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border2);
+    background: var(--surface);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .print-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
+  .size-row { display: flex; gap: 6px; margin-bottom: 8px; }
+  .size-opt {
+    flex: 1;
+    padding: 5px 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    background: var(--surface2);
+    color: var(--text2);
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .size-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .size-opt.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+  /* Well Plate */
+  .plate-wrapper {
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    padding: 28px 32px;
+    border: 1px solid var(--border);
+    max-width: 100%;
+  }
+  .plate-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text3);
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .plate-grid-wrap { overflow-x: auto; }
+  .plate-grid {
+    display: grid;
+    gap: 3px;
+  }
+  .well-row { display: contents; }
+
+  .row-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+  }
+  .col-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 16px;
+  }
+
+  .well {
+    border-radius: 50%;
+    border: 1.5px solid var(--border2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s, box-shadow 0.1s;
+    background: var(--surface2);
+    position: relative;
+    overflow: visible;
+  }
+  .well:hover { transform: scale(1.12); box-shadow: 0 0 0 2px var(--accent), 0 2px 8px rgba(0,0,0,0.12); z-index: 5; }
+  .well.selected { box-shadow: 0 0 0 2.5px var(--accent); transform: scale(1.06); z-index: 3; }
+  .well.assigned { border-color: transparent; }
+  .well-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.1;
+    padding: 1px;
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 95%;
+    color: rgba(0,0,0,0.75);
+  }
+
+  /* Tooltip */
+  .tooltip {
+    position: fixed;
+    background: var(--text);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    pointer-events: none;
+    z-index: 1000;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  .tooltip.show { opacity: 1; }
+
+  /* Bottom bar info */
+  .bb-tag {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  /* Color palette for wells */
+  /* assigned colors by index in assignments array */
+
+  @media print {
+    body { background: white; }
+    header, .sidebar, .bottom-bar { display: none !important; }
+    .layout { height: auto; }
+    .main { overflow: visible; }
+    .plate-area { padding: 0; align-items: flex-start; justify-content: flex-start; }
+    .plate-wrapper { box-shadow: none; border: 1px solid #ccc; }
+    .print-legend { display: block !important; margin-top: 20px; }
+  }
+
+  .print-legend { display: none; }
+
+  .notif {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--text);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    box-shadow: var(--shadow-md);
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.2s;
+  }
+  .notif.show { opacity: 1; transform: translateY(0); }
+
+  label.mini { font-size: 11px; color: var(--text3); margin-bottom: 4px; display: block; }
+  .spacer { height: 6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Well Plate Layout Designer</h1>
+  <span id="plateInfo">96-well · 8×12</span>
+</header>
+
+<div class="layout">
+  <div class="sidebar">
+
+    <!-- Format -->
+    <div class="sct">
+      <div class="sct-title">Plate Format</div>
+      <div class="format-grid">
+        <button class="fmt-btn" onclick="setFormat(6)">6</button>
+        <button class="fmt-btn" onclick="setFormat(12)">12</button>
+        <button class="fmt-btn" onclick="setFormat(24)">24</button>
+        <button class="fmt-btn" onclick="setFormat(48)">48</button>
+        <button class="fmt-btn active" onclick="setFormat(96)">96</button>
+        <button class="fmt-btn" onclick="setFormat(384)">384</button>
+      </div>
+    </div>
+
+    <!-- Selection tools -->
+    <div class="sct">
+      <div class="sct-title">Selection</div>
+      <div class="sel-row">
+        <button class="sel-btn" onclick="selectAll()">All</button>
+        <button class="sel-btn" onclick="clearSelection()">None</button>
+        <button class="sel-btn" onclick="invertSelection()">Invert</button>
+      </div>
+      <div class="sel-row">
+        <button class="sel-btn" onclick="selectByRow()">By Row</button>
+        <button class="sel-btn" onclick="selectByCol()">By Col</button>
+        <button class="sel-btn" onclick="selectEmpty()">Empty</button>
+      </div>
+      <div style="font-size: 11px; color: var(--text3); margin-top: 4px;">
+        Shift+click: row · Ctrl+click: column · Drag: box select
+      </div>
+    </div>
+
+    <!-- Cell line -->
+    <div class="sct">
+      <div class="sct-title">Cell Line</div>
+      <label class="mini">From database</label>
+      <select id="cellSelect" onchange="syncCellInput()">
+        <option value="">— select cell line —</option>
+      </select>
+      <label class="mini" style="margin-top:6px;">Or type custom</label>
+      <input type="text" id="cellInput" placeholder="e.g. Vero E6, HEK293..." oninput="syncCellSelect()">
+    </div>
+
+    <!-- Condition -->
+    <div class="sct">
+      <div class="sct-title">Condition</div>
+      <div class="cond-row">
+        <button class="cond-btn active-inf" id="cInf" onclick="setCondition('Infected')">Infected</button>
+        <button class="cond-btn" id="cMock" onclick="setCondition('Mock')">Mock</button>
+      </div>
+      <div class="cond-row">
+        <button class="cond-btn" id="cCtrl" onclick="setCondition('Control')">Control</button>
+        <button class="cond-btn" id="cTreat" onclick="setCondition('Treated')">Treated</button>
+      </div>
+      <div class="spacer"></div>
+      <label class="mini">Treatment / Virus (optional)</label>
+      <input type="text" id="treatInput" placeholder="e.g. IBV, SARS-CoV-2...">
+      <label class="mini">Concentration / MOI (optional)</label>
+      <input type="text" id="concInput" placeholder="e.g. MOI 0.1, 10 µM...">
+    </div>
+
+    <!-- Apply -->
+    <div class="sct">
+      <div class="sct-title">Assign</div>
+      <button class="apply-btn" onclick="applyToSelection()">Apply to Selected Wells</button>
+      <button class="clear-btn" onclick="clearSelected()">Clear Selected Wells</button>
+    </div>
+
+    <!-- Legend -->
+    <div class="sct" style="flex:1; min-height: 80px;">
+      <div class="sct-title">Legend</div>
+      <div class="legend-list" id="legendList">
+        <div style="font-size:12px;color:var(--text3);font-style:italic;">No assignments yet.</div>
+      </div>
+    </div>
+
+    <!-- Print -->
+    <div class="sct">
+      <div class="sct-title">Print / Save</div>
+      <label class="mini">Paper size</label>
+      <div class="size-row">
+        <button class="size-opt active" id="sA4" onclick="setPaperSize('A4')">A4</button>
+        <button class="size-opt" id="sA3" onclick="setPaperSize('A3')">A3</button>
+        <button class="size-opt" id="sLetter" onclick="setPaperSize('Letter')">Letter</button>
+      </div>
+      <div class="action-btns">
+        <button class="print-btn" onclick="printPlate()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
+          Print Layout
+        </button>
+        <button class="print-btn" onclick="exportCSV()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Export CSV
+        </button>
+        <button class="print-btn" onclick="exportJSON()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6"/></svg>
+          Save JSON
+        </button>
+        <button class="print-btn" onclick="loadJSON()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          Load JSON
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="main">
+    <div class="plate-area" id="plateArea">
+      <div class="plate-wrapper" id="plateWrapper">
+        <div class="plate-title" id="plateTitleEl">96-Well Plate</div>
+        <div class="plate-grid-wrap">
+          <div class="plate-grid" id="plateGrid"></div>
+        </div>
+        <div class="print-legend" id="printLegend"></div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <span>Selected: <span class="bb-tag" id="bbSel">0</span></span>
+      <span>Assigned: <span class="bb-tag" id="bbAsgn">0</span></span>
+      <span>Empty: <span class="bb-tag" id="bbEmpty">0</span></span>
+      <span style="margin-left:auto; color: var(--text3);">Click wells to select · Right-click to clear single well</span>
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+<div class="notif" id="notif"></div>
+
+<script>
+const FORMATS = {
+  6:   { rows: 2, cols: 3 },
+  12:  { rows: 3, cols: 4 },
+  24:  { rows: 4, cols: 6 },
+  48:  { rows: 6, cols: 8 },
+  96:  { rows: 8, cols: 12 },
+  384: { rows: 16, cols: 24 }
+};
+
+const COND_COLORS = {
+  'Infected': { bg: '#fde8e8', border: '#e57373', text: '#b71c1c' },
+  'Mock':     { bg: '#e8f5e9', border: '#66bb6a', text: '#1b5e20' },
+  'Control':  { bg: '#fff8e1', border: '#ffca28', text: '#6d4c00' },
+  'Treated':  { bg: '#ede7f6', border: '#9575cd', text: '#311b92' }
+};
+
+const CELL_COLORS = [
+  '#b3d9ff','#b3f0d9','#ffe0b3','#f3b3f0','#b3ecff',
+  '#d4edda','#fff3cd','#f8d7da','#d1ecf1','#fce4ec',
+  '#e8f5e9','#e3f2fd','#f3e5f5','#fff9c4','#fbe9e7'
+];
+
+let currentFormat = 96;
+let wells = {};
+let selected = new Set();
+let currentCondition = 'Infected';
+let assignments = [];
+let paperSize = 'A4';
+let dragSelecting = false;
+let dragStart = null;
+let csvData = [];
+
+function getRowLabel(r) { return String.fromCharCode(65 + r); }
+
+function initWells(fmt) {
+  const { rows, cols } = FORMATS[fmt];
+  wells = {};
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      wells[`${r}-${c}`] = null;
+    }
+  }
+  selected.clear();
+}
+
+function setFormat(fmt) {
+  currentFormat = fmt;
+  document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.fmt-btn').forEach(b => {
+    if (b.textContent.trim() == fmt) b.classList.add('active');
+  });
+  const { rows, cols } = FORMATS[fmt];
+  document.getElementById('plateInfo').textContent = `${fmt}-well · ${rows}×${cols}`;
+  document.getElementById('plateTitleEl').textContent = `${fmt}-Well Plate`;
+  initWells(fmt);
+  renderPlate();
+  updateLegend();
+  updateBottomBar();
+}
+
+function renderPlate() {
+  const grid = document.getElementById('plateGrid');
+  const { rows, cols } = FORMATS[currentFormat];
+
+  const wellSize = currentFormat <= 24 ? 56 :
+                   currentFormat <= 48 ? 44 :
+                   currentFormat <= 96 ? 34 : 18;
+  const gap = currentFormat <= 96 ? 3 : 2;
+
+  grid.style.gridTemplateColumns = `20px repeat(${cols}, ${wellSize}px)`;
+  grid.style.gap = `${gap}px`;
+  grid.innerHTML = '';
+
+  // Header row
+  const corner = document.createElement('div');
+  grid.appendChild(corner);
+  for (let c = 0; c < cols; c++) {
+    const lbl = document.createElement('div');
+    lbl.className = 'col-label';
+    lbl.textContent = c + 1;
+    grid.appendChild(lbl);
+  }
+
+  // Data rows
+  for (let r = 0; r < rows; r++) {
+    const rlbl = document.createElement('div');
+    rlbl.className = 'row-label';
+    rlbl.textContent = getRowLabel(r);
+    grid.appendChild(rlbl);
+
+    for (let c = 0; c < cols; c++) {
+      const key = `${r}-${c}`;
+      const well = document.createElement('div');
+      well.className = 'well';
+      well.style.width = `${wellSize}px`;
+      well.style.height = `${wellSize}px`;
+      well.dataset.key = key;
+      well.dataset.r = r;
+      well.dataset.c = c;
+
+      applyWellStyle(well, key, wellSize);
+
+      well.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        if (e.button === 2) return;
+        dragSelecting = true;
+        dragStart = { r, c };
+        handleWellClick(e, r, c, key);
+      });
+      well.addEventListener('mouseenter', (e) => {
+        if (dragSelecting && e.buttons === 1) {
+          boxSelectTo(r, c);
+        }
+        showTooltip(e, key, r, c);
+      });
+      well.addEventListener('mouseleave', hideTooltip);
+      well.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        clearWell(key);
+      });
+
+      grid.appendChild(well);
+    }
+  }
+
+  document.addEventListener('mouseup', () => { dragSelecting = false; dragStart = null; });
+}
+
+function applyWellStyle(wellEl, key, wellSize) {
+  const data = wells[key];
+  const isSelected = selected.has(key);
+  const labelEl = wellEl.querySelector('.well-label') || document.createElement('div');
+  labelEl.className = 'well-label';
+
+  if (data) {
+    wellEl.classList.add('assigned');
+    const cond = data.condition || 'Infected';
+    const cc = COND_COLORS[cond] || COND_COLORS['Infected'];
+    const cellColor = data.cellColor || '#f0f0f0';
+    wellEl.style.background = cellColor;
+    wellEl.style.borderColor = cc.border;
+    wellEl.style.borderWidth = '2px';
+
+    const fontSize = wellSize <= 20 ? 7 : wellSize <= 34 ? 8 : 9;
+    labelEl.style.fontSize = `${fontSize}px`;
+    labelEl.style.color = cc.text;
+
+    let txt = '';
+    if (data.cell && wellSize > 22) txt += data.cell.split(' ')[0];
+    if (data.treatment && wellSize > 22) txt += (txt ? '\n' : '') + data.treatment.substring(0, 6);
+    if (data.conc && wellSize > 30) txt += (txt ? '\n' : '') + data.conc.substring(0, 8);
+    if (wellSize <= 22) txt = cond[0];
+    labelEl.textContent = txt || cond[0];
+    labelEl.style.whiteSpace = 'pre';
+  } else {
+    wellEl.classList.remove('assigned');
+    wellEl.style.background = '';
+    wellEl.style.borderColor = '';
+    wellEl.style.borderWidth = '';
+    labelEl.textContent = '';
+  }
+
+  if (isSelected) {
+    wellEl.classList.add('selected');
+    wellEl.style.outline = '2px solid #2a5f8f';
+    wellEl.style.outlineOffset = '1px';
+  } else {
+    wellEl.classList.remove('selected');
+    wellEl.style.outline = '';
+    wellEl.style.outlineOffset = '';
+  }
+
+  if (!wellEl.contains(labelEl)) wellEl.appendChild(labelEl);
+}
+
+function refreshWellEl(key) {
+  const el = document.querySelector(`.well[data-key="${key}"]`);
+  if (!el) return;
+  const { rows, cols } = FORMATS[currentFormat];
+  const wellSize = currentFormat <= 24 ? 56 : currentFormat <= 48 ? 44 : currentFormat <= 96 ? 34 : 18;
+  applyWellStyle(el, key, wellSize);
+}
+
+function handleWellClick(e, r, c, key) {
+  if (e.shiftKey) {
+    const { cols } = FORMATS[currentFormat];
+    for (let cc = 0; cc < cols; cc++) {
+      toggleSelect(`${r}-${cc}`, true);
+    }
+  } else if (e.ctrlKey || e.metaKey) {
+    const { rows } = FORMATS[currentFormat];
+    for (let rr = 0; rr < rows; rr++) {
+      toggleSelect(`${rr}-${c}`, true);
+    }
+  } else {
+    toggleSelect(key);
+  }
+  updateBottomBar();
+}
+
+function toggleSelect(key, add = false) {
+  if (add) {
+    selected.add(key);
+  } else {
+    if (selected.has(key)) selected.delete(key);
+    else selected.add(key);
+  }
+  refreshWellEl(key);
+}
+
+function boxSelectTo(r, c) {
+  if (!dragStart) return;
+  const { rows, cols } = FORMATS[currentFormat];
+  const r1 = Math.min(dragStart.r, r), r2 = Math.max(dragStart.r, r);
+  const c1 = Math.min(dragStart.c, c), c2 = Math.max(dragStart.c, c);
+  selected.clear();
+  for (let rr = r1; rr <= r2; rr++)
+    for (let cc = c1; cc <= c2; cc++)
+      selected.add(`${rr}-${cc}`);
+  document.querySelectorAll('.well').forEach(w => {
+    applyWellStyle(w, w.dataset.key, parseInt(w.style.width));
+  });
+  updateBottomBar();
+}
+
+function selectAll() {
+  Object.keys(wells).forEach(k => selected.add(k));
+  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
+  updateBottomBar();
+}
+
+function clearSelection() {
+  selected.clear();
+  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
+  updateBottomBar();
+}
+
+function invertSelection() {
+  Object.keys(wells).forEach(k => { if (selected.has(k)) selected.delete(k); else selected.add(k); });
+  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
+  updateBottomBar();
+}
+
+function selectByRow() {
+  const rowInput = prompt('Select row(s) e.g. A or A,B,C:');
+  if (!rowInput) return;
+  const { rows, cols } = FORMATS[currentFormat];
+  rowInput.split(',').forEach(l => {
+    l = l.trim().toUpperCase();
+    const r = l.charCodeAt(0) - 65;
+    if (r >= 0 && r < rows) {
+      for (let c = 0; c < cols; c++) selected.add(`${r}-${c}`);
+    }
+  });
+  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
+  updateBottomBar();
+}
+
+function selectByCol() {
+  const colInput = prompt('Select column(s) e.g. 1 or 1,2,3:');
+  if (!colInput) return;
+  const { rows, cols } = FORMATS[currentFormat];
+  colInput.split(',').forEach(n => {
+    const c = parseInt(n.trim()) - 1;
+    if (c >= 0 && c < cols) {
+      for (let r = 0; r < rows; r++) selected.add(`${r}-${c}`);
+    }
+  });
+  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
+  updateBottomBar();
+}
+
+function selectEmpty() {
+  Object.keys(wells).forEach(k => { if (!wells[k]) selected.add(k); });
+  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
+  updateBottomBar();
+}
+
+function getAssignmentKey(data) {
+  return `${data.cell||''}|${data.condition}|${data.treatment||''}|${data.conc||''}`;
+}
+
+function getOrCreateAssignment(data) {
+  const k = getAssignmentKey(data);
+  let a = assignments.find(x => x.key === k);
+  if (!a) {
+    const ci = assignments.length % CELL_COLORS.length;
+    a = { key: k, ...data, color: CELL_COLORS[ci] };
+    assignments.push(a);
+  }
+  return a;
+}
+
+function applyToSelection() {
+  if (selected.size === 0) { notify('Select wells first!'); return; }
+  const cell = document.getElementById('cellInput').value.trim();
+  const condition = currentCondition;
+  const treatment = document.getElementById('treatInput').value.trim();
+  const conc = document.getElementById('concInput').value.trim();
+
+  const data = { cell, condition, treatment, conc };
+  const a = getOrCreateAssignment(data);
+
+  selected.forEach(k => {
+    wells[k] = { ...data, cellColor: a.color };
+  });
+
+  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
+  updateLegend();
+  updateBottomBar();
+  notify(`Applied to ${selected.size} well${selected.size > 1 ? 's' : ''}`);
+}
+
+function clearSelected() {
+  selected.forEach(k => { wells[k] = null; });
+  document.querySelectorAll('.well').forEach(w => applyWellStyle(w, w.dataset.key, parseInt(w.style.width)));
+  updateLegend();
+  updateBottomBar();
+}
+
+function clearWell(key) {
+  wells[key] = null;
+  selected.delete(key);
+  refreshWellEl(key);
+  updateLegend();
+  updateBottomBar();
+}
+
+function setCondition(c) {
+  currentCondition = c;
+  ['Inf','Mock','Ctrl','Treat'].forEach(x => document.getElementById('c'+x)?.classList.remove('active-inf','active-mock','active-ctrl','active-treat'));
+  const map = { Infected:'Inf', Mock:'Mock', Control:'Ctrl', Treated:'Treat' };
+  const classMap = { Infected:'active-inf', Mock:'active-mock', Control:'active-ctrl', Treated:'active-treat' };
+  const btn = document.getElementById('c' + map[c]);
+  if (btn) btn.classList.add(classMap[c]);
+}
+
+function updateLegend() {
+  const legendList = document.getElementById('legendList');
+  const used = new Set(Object.values(wells).filter(Boolean).map(d => getAssignmentKey(d)));
+  const visible = assignments.filter(a => used.has(a.key));
+  if (visible.length === 0) {
+    legendList.innerHTML = '<div style="font-size:12px;color:var(--text3);font-style:italic;">No assignments yet.</div>';
+    document.getElementById('printLegend').innerHTML = '';
+    return;
+  }
+  legendList.innerHTML = visible.map(a => {
+    const cc = COND_COLORS[a.condition] || COND_COLORS['Infected'];
+    const parts = [a.cell, a.condition, a.treatment, a.conc].filter(Boolean);
+    return `<div class="legend-item">
+      <div class="legend-dot" style="background:${a.color};border:1.5px solid ${cc.border};"></div>
+      <span style="color:var(--text);font-size:11px;">${parts.join(' · ')}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('printLegend').innerHTML = `
+    <hr style="margin:16px 0;border:none;border-top:1px solid #ccc;">
+    <div style="font-size:11px;font-weight:600;margin-bottom:8px;font-family:monospace;">LEGEND</div>
+    ${visible.map(a => {
+      const cc = COND_COLORS[a.condition] || COND_COLORS['Infected'];
+      const parts = [a.cell, a.condition, a.treatment, a.conc].filter(Boolean);
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div style="width:14px;height:14px;border-radius:3px;background:${a.color};border:1.5px solid ${cc.border};flex-shrink:0;"></div>
+        <span style="font-size:11px;font-family:monospace;">${parts.join(' · ')}</span>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function updateBottomBar() {
+  const total = Object.keys(wells).length;
+  const assigned = Object.values(wells).filter(Boolean).length;
+  document.getElementById('bbSel').textContent = selected.size;
+  document.getElementById('bbAsgn').textContent = assigned;
+  document.getElementById('bbEmpty').textContent = total - assigned;
+}
+
+// Tooltip
+const tooltipEl = document.getElementById('tooltip');
+function showTooltip(e, key, r, c) {
+  const data = wells[key];
+  const wellId = `${getRowLabel(r)}${c + 1}`;
+  let html = `<b>${wellId}</b>`;
+  if (data) {
+    if (data.cell) html += ` · ${data.cell}`;
+    if (data.condition) html += `<br>${data.condition}`;
+    if (data.treatment) html += ` · ${data.treatment}`;
+    if (data.conc) html += `<br>${data.conc}`;
+  } else {
+    html += '<br>Empty';
+  }
+  tooltipEl.innerHTML = html;
+  tooltipEl.classList.add('show');
+  moveTooltip(e);
+}
+function hideTooltip() { tooltipEl.classList.remove('show'); }
+document.addEventListener('mousemove', moveTooltip);
+function moveTooltip(e) {
+  tooltipEl.style.left = (e.clientX + 14) + 'px';
+  tooltipEl.style.top = (e.clientY - 10) + 'px';
+}
+
+// Cell sync
+function syncCellInput() {
+  const v = document.getElementById('cellSelect').value;
+  if (v) document.getElementById('cellInput').value = v;
+}
+function syncCellSelect() {
+  document.getElementById('cellSelect').value = '';
+}
+
+// Paper size
+function setPaperSize(size) {
+  paperSize = size;
+  ['A4','A3','Letter'].forEach(s => {
+    document.getElementById('s'+s)?.classList.toggle('active', s === size);
+  });
+}
+
+// Print
+function printPlate() {
+  const sizeCss = {
+    A4: '@page{size:A4 landscape}',
+    A3: '@page{size:A3 landscape}',
+    Letter: '@page{size:letter landscape}'
+  }[paperSize] || '';
+  const style = document.createElement('style');
+  style.textContent = sizeCss;
+  document.head.appendChild(style);
+  window.print();
+  setTimeout(() => style.remove(), 1000);
+}
+
+// Export CSV
+function exportCSV() {
+  const { rows, cols } = FORMATS[currentFormat];
+  let csv = 'Well,Row,Column,Cell Line,Condition,Treatment,Concentration\n';
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const key = `${r}-${c}`;
+      const d = wells[key];
+      const wellId = `${getRowLabel(r)}${c + 1}`;
+      csv += `${wellId},${getRowLabel(r)},${c + 1},${d?.cell||''},${d?.condition||''},${d?.treatment||''},${d?.conc||''}\n`;
+    }
+  }
+  download('well_plate_layout.csv', csv, 'text/csv');
+  notify('CSV exported!');
+}
+
+// JSON
+function exportJSON() {
+  const data = { format: currentFormat, wells, assignments };
+  download('well_plate_layout.json', JSON.stringify(data, null, 2), 'application/json');
+  notify('JSON saved!');
+}
+
+function loadJSON() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        currentFormat = data.format || 96;
+        wells = data.wells || {};
+        assignments = data.assignments || [];
+        document.querySelectorAll('.fmt-btn').forEach(b => {
+          b.classList.toggle('active', b.textContent.trim() == currentFormat);
+        });
+        renderPlate();
+        updateLegend();
+        updateBottomBar();
+        notify('Layout loaded!');
+      } catch { notify('Invalid JSON file'); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+function download(name, content, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = name;
+  a.click();
+}
+
+// Notify
+function notify(msg) {
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// Load cells from Google Sheets CSV
+async function loadCellLines() {
+  const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7oI87aVZGiXPZdsQdqdfvPlBru3oZZZPw2AbqzEAbQPKr7m5iWEoL6BBH3M2hThSZpZ232R5TbjTt/pub?output=csv';
+  const select = document.getElementById('cellSelect');
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('fetch failed');
+    const text = await res.text();
+    const lines = text.split('\n').filter(l => l.trim());
+    const cells = new Set();
+    lines.forEach((line, i) => {
+      line.split(',').forEach(cell => {
+        const v = cell.replace(/^"|"$/g, '').trim();
+        if (v && i > 0) cells.add(v); // skip header row
+        else if (v && i === 0) {/* could be header */}
+      });
+    });
+    // add all non-empty values from first col
+    const col0 = lines.map(l => {
+      const parts = l.split(',');
+      return parts[0].replace(/^"|"$/g,'').trim();
+    }).filter(Boolean);
+    col0.forEach((v, i) => { if (i > 0 || !v.match(/^[A-Z][a-z]/)) cells.add(v); });
+    // actually just take all unique cells from all columns
+    csvData = lines;
+    const allCells = new Set();
+    lines.forEach(line => {
+      line.split(',').forEach(c => {
+        const v = c.replace(/^"|"$/g,'').trim();
+        if (v) allCells.add(v);
+      });
+    });
+    [...allCells].sort().forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v;
+      select.appendChild(opt);
+    });
+  } catch(err) {
+    const opt = document.createElement('option');
+    opt.value = ''; opt.textContent = '— failed to load —';
+    opt.disabled = true;
+    select.appendChild(opt);
+    console.warn('Could not load cell lines from sheet:', err);
+  }
+}
+
+// Init
+setFormat(96);
+loadCellLines();
+setCondition('Infected');
+</script>
+</body>
+</html>

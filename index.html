@@ -123,33 +123,46 @@
   .fmt-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
   .fmt-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  /* Cell selector */
-  #cellSelect {
+  /* Combobox */
+  .combobox-wrap { position: relative; width: 100%; }
+  .combobox-input {
     width: 100%;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 7px 10px;
+    padding: 7px 30px 7px 10px;
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
     background: var(--surface);
     color: var(--text);
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    cursor: pointer;
+    cursor: text;
   }
-  #cellInput {
-    width: 100%;
-    border: 1px solid var(--border);
+  .combobox-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(42,95,143,0.15); }
+  .combobox-arrow {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    pointer-events: none; color: var(--text3); font-size: 10px;
+  }
+  .combobox-dropdown {
+    position: absolute; top: calc(100% + 3px); left: 0; right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border2);
     border-radius: var(--radius);
-    padding: 7px 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    color: var(--text);
-    margin-top: 6px;
+    box-shadow: var(--shadow-md);
+    max-height: 180px; overflow-y: auto;
+    z-index: 200; display: none;
   }
-  #cellInput:focus, #cellSelect:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(42,95,143,0.15); }
+  .combobox-dropdown.open { display: block; }
+  .combobox-opt {
+    padding: 7px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    border-bottom: 1px solid var(--border);
+  }
+  .combobox-opt:last-child { border-bottom: none; }
+  .combobox-opt:hover, .combobox-opt.highlighted { background: var(--accent-light); color: var(--accent); }
+  .combobox-opt em { font-style: normal; font-weight: 600; color: var(--accent); }
+  .combobox-empty { padding: 8px 10px; font-size: 12px; color: var(--text3); font-style: italic; }
 
   /* Condition */
   .cond-row { display: flex; gap: 6px; margin-bottom: 6px; }
@@ -167,10 +180,19 @@
     color: var(--text2);
   }
   .cond-btn:hover { border-color: var(--text2); color: var(--text); }
-  .cond-btn.active-inf { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
-  .cond-btn.active-mock { background: var(--accent2-light); border-color: var(--accent2); color: var(--accent2); }
-  .cond-btn.active-ctrl { background: var(--amber-light); border-color: var(--amber); color: var(--amber); }
-  .cond-btn.active-treat { background: var(--purple-light); border-color: var(--purple); color: var(--purple); }
+  .cond-btn.active-mock   { background: var(--accent2-light); border-color: var(--accent2); color: var(--accent2); }
+  .cond-btn.active-inf    { background: var(--danger-light);  border-color: var(--danger);  color: var(--danger); }
+  .cond-btn.active-blank  { background: #f1f0eb; border-color: #bbb; color: #555; }
+  .cond-btn.active-ctrl   { background: var(--amber-light);   border-color: var(--amber);   color: var(--amber); }
+  .cond-btn.active-treat  { background: var(--purple-light);  border-color: var(--purple);  color: var(--purple); }
+  .cond-btn.active-custom { background: #e0f4f4; border-color: #2a9d8f; color: #1a6b62; }
+  #customCondWrap { margin-top: 6px; display: none; }
+  #customCondWrap.show { display: block; }
+  #customCondInput {
+    width: 100%; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 7px 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text);
+  }
+  #customCondInput:focus { outline: none; border-color: #2a9d8f; box-shadow: 0 0 0 2px rgba(42,157,143,0.15); }
 
   /* Concentration / treatment */
   #concInput, #treatInput {
@@ -402,9 +424,10 @@
     header, .sidebar, .bottom-bar { display: none !important; }
     .layout { height: auto; }
     .main { overflow: visible; }
-    .plate-area { padding: 0; align-items: flex-start; justify-content: flex-start; }
-    .plate-wrapper { box-shadow: none; border: 1px solid #ccc; }
-    .print-legend { display: block !important; margin-top: 20px; }
+    .plate-area { padding: 0; align-items: flex-start; justify-content: flex-start; overflow: visible; }
+    .plate-wrapper { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+    .print-legend { display: block !important; margin-top: 12px; }
+    /* Size variants injected dynamically via JS */
   }
 
   .print-legend { display: none; }
@@ -475,24 +498,29 @@
     <!-- Cell line -->
     <div class="sct">
       <div class="sct-title">Cell Line</div>
-      <label class="mini">From database</label>
-      <select id="cellSelect" onchange="syncCellInput()">
-        <option value="">— select cell line —</option>
-      </select>
-      <label class="mini" style="margin-top:6px;">Or type custom</label>
-      <input type="text" id="cellInput" placeholder="e.g. Vero E6, HEK293..." oninput="syncCellSelect()">
+      <div class="combobox-wrap" id="cellComboWrap">
+        <input type="text" id="cellInput" class="combobox-input" placeholder="Type to search or enter custom…" autocomplete="off"
+          oninput="filterCombo()" onfocus="openCombo()" onkeydown="comboKeydown(event)">
+        <span class="combobox-arrow">▼</span>
+        <div class="combobox-dropdown" id="comboDropdown"></div>
+      </div>
     </div>
 
     <!-- Condition -->
     <div class="sct">
       <div class="sct-title">Condition</div>
       <div class="cond-row">
+        <button class="cond-btn" id="cMock"   onclick="setCondition('Mock')">Mock</button>
         <button class="cond-btn active-inf" id="cInf" onclick="setCondition('Infected')">Infected</button>
-        <button class="cond-btn" id="cMock" onclick="setCondition('Mock')">Mock</button>
+        <button class="cond-btn" id="cBlank"  onclick="setCondition('Blank')">Blank</button>
       </div>
       <div class="cond-row">
-        <button class="cond-btn" id="cCtrl" onclick="setCondition('Control')">Control</button>
-        <button class="cond-btn" id="cTreat" onclick="setCondition('Treated')">Treated</button>
+        <button class="cond-btn" id="cCtrl"   onclick="setCondition('Control')">Control</button>
+        <button class="cond-btn" id="cTreat"  onclick="setCondition('Treated')">Treated</button>
+        <button class="cond-btn" id="cCustom" onclick="setCondition('Custom')">Custom…</button>
+      </div>
+      <div id="customCondWrap">
+        <input type="text" id="customCondInput" placeholder="Enter condition name…" oninput="updateCustomLabel()">
       </div>
       <div class="spacer"></div>
       <label class="mini">Treatment / Virus (optional)</label>
@@ -519,11 +547,11 @@
     <!-- Print -->
     <div class="sct">
       <div class="sct-title">Print / Save</div>
-      <label class="mini">Paper size</label>
+      <label class="mini">Print size</label>
       <div class="size-row">
-        <button class="size-opt active" id="sA4" onclick="setPaperSize('A4')">A4</button>
-        <button class="size-opt" id="sA3" onclick="setPaperSize('A3')">A3</button>
-        <button class="size-opt" id="sLetter" onclick="setPaperSize('Letter')">Letter</button>
+        <button class="size-opt active" id="sCompact"  onclick="setPrintSize('compact')">Compact</button>
+        <button class="size-opt"        id="sHalf"     onclick="setPrintSize('half')">Half</button>
+        <button class="size-opt"        id="sFull"     onclick="setPrintSize('full')">Full</button>
       </div>
       <div class="action-btns">
         <button class="print-btn" onclick="printPlate()">
@@ -581,10 +609,12 @@ const FORMATS = {
 };
 
 const COND_COLORS = {
-  'Infected': { bg: '#fde8e8', border: '#e57373', text: '#b71c1c' },
   'Mock':     { bg: '#e8f5e9', border: '#66bb6a', text: '#1b5e20' },
+  'Infected': { bg: '#fde8e8', border: '#e57373', text: '#b71c1c' },
+  'Blank':    { bg: '#f5f5f2', border: '#b0aea6', text: '#444' },
   'Control':  { bg: '#fff8e1', border: '#ffca28', text: '#6d4c00' },
-  'Treated':  { bg: '#ede7f6', border: '#9575cd', text: '#311b92' }
+  'Treated':  { bg: '#ede7f6', border: '#9575cd', text: '#311b92' },
+  'Custom':   { bg: '#e0f4f4', border: '#2a9d8f', text: '#1a6b62' }
 };
 
 const CELL_COLORS = [
@@ -598,10 +628,10 @@ let wells = {};
 let selected = new Set();
 let currentCondition = 'Infected';
 let assignments = [];
-let paperSize = 'A4';
+let printSize = 'compact';
 let dragSelecting = false;
 let dragStart = null;
-let csvData = [];
+let allCellOptions = [];
 
 function getRowLabel(r) { return String.fromCharCode(65 + r); }
 
@@ -708,7 +738,7 @@ function applyWellStyle(wellEl, key, wellSize) {
   if (data) {
     wellEl.classList.add('assigned');
     const cond = data.condition || 'Infected';
-    const cc = COND_COLORS[cond] || COND_COLORS['Infected'];
+    const cc = COND_COLORS[cond] || COND_COLORS['Custom'];
     const cellColor = data.cellColor || '#f0f0f0';
     wellEl.style.background = cellColor;
     wellEl.style.borderColor = cc.border;
@@ -867,7 +897,10 @@ function getOrCreateAssignment(data) {
 function applyToSelection() {
   if (selected.size === 0) { notify('Select wells first!'); return; }
   const cell = document.getElementById('cellInput').value.trim();
-  const condition = currentCondition;
+  let condition = currentCondition;
+  if (condition === 'Custom') {
+    condition = document.getElementById('customCondInput').value.trim() || 'Custom';
+  }
   const treatment = document.getElementById('treatInput').value.trim();
   const conc = document.getElementById('concInput').value.trim();
 
@@ -901,11 +934,23 @@ function clearWell(key) {
 
 function setCondition(c) {
   currentCondition = c;
-  ['Inf','Mock','Ctrl','Treat'].forEach(x => document.getElementById('c'+x)?.classList.remove('active-inf','active-mock','active-ctrl','active-treat'));
-  const map = { Infected:'Inf', Mock:'Mock', Control:'Ctrl', Treated:'Treat' };
-  const classMap = { Infected:'active-inf', Mock:'active-mock', Control:'active-ctrl', Treated:'active-treat' };
+  const ids = ['Mock','Inf','Blank','Ctrl','Treat','Custom'];
+  const cls = { Mock:'active-mock', Inf:'active-inf', Blank:'active-blank', Ctrl:'active-ctrl', Treat:'active-treat', Custom:'active-custom' };
+  ids.forEach(x => { const b = document.getElementById('c'+x); if(b) { b.className = 'cond-btn'; } });
+  const map = { Mock:'Mock', Infected:'Inf', Blank:'Blank', Control:'Ctrl', Treated:'Treat', Custom:'Custom' };
   const btn = document.getElementById('c' + map[c]);
-  if (btn) btn.classList.add(classMap[c]);
+  if (btn) btn.classList.add(cls[map[c]]);
+  const wrap = document.getElementById('customCondWrap');
+  if (c === 'Custom') {
+    wrap.classList.add('show');
+    document.getElementById('customCondInput').focus();
+  } else {
+    wrap.classList.remove('show');
+  }
+}
+
+function updateCustomLabel() {
+  // custom condition label is read live from input at apply time
 }
 
 function updateLegend() {
@@ -918,7 +963,7 @@ function updateLegend() {
     return;
   }
   legendList.innerHTML = visible.map(a => {
-    const cc = COND_COLORS[a.condition] || COND_COLORS['Infected'];
+    const cc = COND_COLORS[a.condition] || COND_COLORS['Custom'];
     const parts = [a.cell, a.condition, a.treatment, a.conc].filter(Boolean);
     return `<div class="legend-item">
       <div class="legend-dot" style="background:${a.color};border:1.5px solid ${cc.border};"></div>
@@ -930,7 +975,7 @@ function updateLegend() {
     <hr style="margin:16px 0;border:none;border-top:1px solid #ccc;">
     <div style="font-size:11px;font-weight:600;margin-bottom:8px;font-family:monospace;">LEGEND</div>
     ${visible.map(a => {
-      const cc = COND_COLORS[a.condition] || COND_COLORS['Infected'];
+      const cc = COND_COLORS[a.condition] || COND_COLORS['Custom'];
       const parts = [a.cell, a.condition, a.treatment, a.conc].filter(Boolean);
       return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
         <div style="width:14px;height:14px;border-radius:3px;background:${a.color};border:1.5px solid ${cc.border};flex-shrink:0;"></div>
@@ -973,35 +1018,106 @@ function moveTooltip(e) {
   tooltipEl.style.top = (e.clientY - 10) + 'px';
 }
 
-// Cell sync
-function syncCellInput() {
-  const v = document.getElementById('cellSelect').value;
-  if (v) document.getElementById('cellInput').value = v;
-}
-function syncCellSelect() {
-  document.getElementById('cellSelect').value = '';
+// Combobox
+let comboHighlight = -1;
+
+function openCombo() {
+  filterCombo();
+  document.getElementById('comboDropdown').classList.add('open');
 }
 
-// Paper size
-function setPaperSize(size) {
-  paperSize = size;
-  ['A4','A3','Letter'].forEach(s => {
-    document.getElementById('s'+s)?.classList.toggle('active', s === size);
+function filterCombo() {
+  const q = document.getElementById('cellInput').value.trim().toLowerCase();
+  const dd = document.getElementById('comboDropdown');
+  const filtered = q
+    ? allCellOptions.filter(v => v.toLowerCase().includes(q))
+    : allCellOptions;
+  comboHighlight = -1;
+  if (filtered.length === 0) {
+    dd.innerHTML = `<div class="combobox-empty">No match — will use "${document.getElementById('cellInput').value.trim() || '…'}" as custom</div>`;
+  } else {
+    dd.innerHTML = filtered.slice(0, 60).map((v, i) => {
+      const hi = q ? v.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<em>$1</em>') : v;
+      return `<div class="combobox-opt" data-val="${v}" onmousedown="pickCombo('${v.replace(/'/g,"\\'")}')">` + hi + `</div>`;
+    }).join('');
+  }
+  dd.classList.add('open');
+}
+
+function pickCombo(val) {
+  document.getElementById('cellInput').value = val;
+  document.getElementById('comboDropdown').classList.remove('open');
+  comboHighlight = -1;
+}
+
+function comboKeydown(e) {
+  const dd = document.getElementById('comboDropdown');
+  const opts = dd.querySelectorAll('.combobox-opt');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    comboHighlight = Math.min(comboHighlight + 1, opts.length - 1);
+    opts.forEach((o,i) => o.classList.toggle('highlighted', i === comboHighlight));
+    if (opts[comboHighlight]) opts[comboHighlight].scrollIntoView({block:'nearest'});
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    comboHighlight = Math.max(comboHighlight - 1, 0);
+    opts.forEach((o,i) => o.classList.toggle('highlighted', i === comboHighlight));
+    if (opts[comboHighlight]) opts[comboHighlight].scrollIntoView({block:'nearest'});
+  } else if (e.key === 'Enter') {
+    if (comboHighlight >= 0 && opts[comboHighlight]) {
+      pickCombo(opts[comboHighlight].dataset.val);
+    } else {
+      dd.classList.remove('open');
+    }
+  } else if (e.key === 'Escape') {
+    dd.classList.remove('open');
+  }
+}
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('cellComboWrap').contains(e.target)) {
+    document.getElementById('comboDropdown').classList.remove('open');
+  }
+});
+
+// Print size
+const PRINT_SIZES = {
+  compact: { wMin: 90,  wMax: 110, hMin: 60,  hMax: 73 },
+  half:    { wMin: 120, wMax: 140, hMin: 80,  hMax: 93 },
+  full:    { wMin: 150, wMax: 170, hMin: 100, hMax: 113 }
+};
+
+function setPrintSize(size) {
+  printSize = size;
+  ['Compact','Half','Full'].forEach(s => {
+    document.getElementById('s'+s)?.classList.toggle('active', s.toLowerCase() === size);
   });
 }
 
-// Print
 function printPlate() {
-  const sizeCss = {
-    A4: '@page{size:A4 landscape}',
-    A3: '@page{size:A3 landscape}',
-    Letter: '@page{size:letter landscape}'
-  }[paperSize] || '';
-  const style = document.createElement('style');
-  style.textContent = sizeCss;
-  document.head.appendChild(style);
+  const sz = PRINT_SIZES[printSize];
+  const wMid = (sz.wMin + sz.wMax) / 2;
+  const hMid = (sz.hMin + sz.hMax) / 2;
+  const styleEl = document.createElement('style');
+  styleEl.id = 'print-size-override';
+  styleEl.textContent = `
+    @page { size: A4 landscape; margin: 8mm; }
+    @media print {
+      #plateWrapper {
+        width: ${wMid}mm !important;
+        max-width: ${wMid}mm !important;
+        min-height: ${hMid}mm !important;
+        padding: 6px 8px !important;
+        overflow: hidden !important;
+      }
+      .plate-grid-wrap { overflow: hidden !important; }
+      .well { transform: none !important; }
+      .plate-area { padding: 0 !important; overflow: hidden !important; }
+    }
+  `;
+  document.head.appendChild(styleEl);
   window.print();
-  setTimeout(() => style.remove(), 1000);
+  setTimeout(() => { const s = document.getElementById('print-size-override'); if(s) s.remove(); }, 1200);
 }
 
 // Export CSV
@@ -1071,28 +1187,11 @@ function notify(msg) {
 // Load cells from Google Sheets CSV
 async function loadCellLines() {
   const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7oI87aVZGiXPZdsQdqdfvPlBru3oZZZPw2AbqzEAbQPKr7m5iWEoL6BBH3M2hThSZpZ232R5TbjTt/pub?output=csv';
-  const select = document.getElementById('cellSelect');
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error('fetch failed');
     const text = await res.text();
     const lines = text.split('\n').filter(l => l.trim());
-    const cells = new Set();
-    lines.forEach((line, i) => {
-      line.split(',').forEach(cell => {
-        const v = cell.replace(/^"|"$/g, '').trim();
-        if (v && i > 0) cells.add(v); // skip header row
-        else if (v && i === 0) {/* could be header */}
-      });
-    });
-    // add all non-empty values from first col
-    const col0 = lines.map(l => {
-      const parts = l.split(',');
-      return parts[0].replace(/^"|"$/g,'').trim();
-    }).filter(Boolean);
-    col0.forEach((v, i) => { if (i > 0 || !v.match(/^[A-Z][a-z]/)) cells.add(v); });
-    // actually just take all unique cells from all columns
-    csvData = lines;
     const allCells = new Set();
     lines.forEach(line => {
       line.split(',').forEach(c => {
@@ -1100,16 +1199,9 @@ async function loadCellLines() {
         if (v) allCells.add(v);
       });
     });
-    [...allCells].sort().forEach(v => {
-      const opt = document.createElement('option');
-      opt.value = v; opt.textContent = v;
-      select.appendChild(opt);
-    });
+    allCellOptions = [...allCells].sort();
   } catch(err) {
-    const opt = document.createElement('option');
-    opt.value = ''; opt.textContent = '— failed to load —';
-    opt.disabled = true;
-    select.appendChild(opt);
+    allCellOptions = [];
     console.warn('Could not load cell lines from sheet:', err);
   }
 }

@@ -44,7 +44,7 @@ header span{font-family:'DM Mono',monospace;font-size:11px;color:#888;}
 .combobox-input{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:6px 28px 6px 10px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);color:var(--text);}
 .combobox-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(42,95,143,.15);}
 .combobox-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text3);font-size:10px;}
-.combobox-dropdown{position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow-md);max-height:200px;overflow-y:auto;overflow-x:hidden;z-index:500;display:none;}
+.combobox-dropdown{position:fixed;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow-md);max-height:200px;overflow-y:auto;overflow-x:hidden;z-index:9999;display:none;}
 .combobox-dropdown.open{display:block;}
 .combobox-opt{padding:7px 10px;font-size:12px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--border);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .combobox-opt:last-child{border-bottom:none;}
@@ -577,8 +577,16 @@ function hideTooltip(){tooltipEl.classList.remove('show');}
 document.addEventListener('mousemove',e=>{tooltipEl.style.left=(e.clientX+14)+'px';tooltipEl.style.top=(e.clientY-10)+'px';});
 
 /* ——— COMBOBOX ——— */
-function openCombo(){filterCombo();document.getElementById('comboDropdown').classList.add('open');}
+function positionComboDropdown(){
+  const r=document.getElementById('cellInput').getBoundingClientRect();
+  const dd=document.getElementById('comboDropdown');
+  dd.style.left=r.left+'px';
+  dd.style.top=(r.bottom+3)+'px';
+  dd.style.width=r.width+'px';
+}
+function openCombo(){positionComboDropdown();filterCombo();document.getElementById('comboDropdown').classList.add('open');}
 function filterCombo(){
+  positionComboDropdown();
   const q=document.getElementById('cellInput').value.trim().toLowerCase();
   const dd=document.getElementById('comboDropdown');
   const filtered=q?allCellOptions.filter(v=>v.toLowerCase().includes(q)):allCellOptions;
@@ -605,6 +613,8 @@ function comboKeydown(e){
   if(opts[comboHighlight])opts[comboHighlight].scrollIntoView({block:'nearest'});
 }
 document.addEventListener('click',e=>{if(!document.getElementById('cellComboWrap').contains(e.target))document.getElementById('comboDropdown').classList.remove('open');});
+document.querySelector('.sidebar').addEventListener('scroll',()=>document.getElementById('comboDropdown').classList.remove('open'));
+window.addEventListener('resize',()=>document.getElementById('comboDropdown').classList.remove('open'));
 
 /* ——— PRINT ——— */
 function setPrintSize(s){
